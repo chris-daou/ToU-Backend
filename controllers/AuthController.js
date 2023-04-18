@@ -61,3 +61,9 @@ const createToken = (id) => {
         expiresIn: maxAge
     })
 }
+
+const createEmailLink = (id) => {
+    const emailToken = jwt.sign({id}, process.env.SECRET_EMAIL, {expiresIn: '2d'});
+    const link = "http://localhost:5000/confirm-email/"+id+"/"+emailToken;
+    return link;
+}
