@@ -146,3 +146,12 @@ module.exports.complete_order_post = async (req, res) => {
         res.status(404).json( { message: 'Client or Order Not Found'})
     }
 }
+
+module.exports.getProfile = async (req, res) => {
+    const clientId = req.user._id;
+    const client = await User.findById(clientId);
+    if(client){
+        res.status(200).json( {client} );
+    }
+    res.status(400).json( {message: 'Something went wrong'} )
+}
