@@ -372,3 +372,30 @@ const sendArrivedEmail = (email, name, lastname, pname) => {
 }
 
 
+
+module.exports.markarrived = async(req, res) => {
+    const orderId = req.params.orderid;
+    const order = await Order.findById(orderId);
+    if(order){
+        try{
+           if(order.status == 4){
+            order.status = 5;
+            order.save();
+
+            const clientId = order.client;
+            const client = await User.findById(clientId);
+            const prodId = order.item;
+            const prod = await Product.findById(prodId);
+
+            sendArrivedEmail(client.email, client.name, client.lastname, prod.title);
+           } 
+        }catch(err){
+            console.log(err);
+            res.status(500).json({message: 'Server Error Occured'});
+        }
+    }else{
+        res.status(404).json({message: 'Order not Found.'})
+    }
+}
+
+
