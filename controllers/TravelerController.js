@@ -30,3 +30,23 @@ let transporter = nodemailer.createTransport({
     }
   });
 
+  module.exports.accept_order = async (req, res) => {
+    const travelerId = req.params.id;
+    const orderId = req.params.id;
+    try {
+        const traveler = await Traveler.findById(travelerId);
+        const order = await Order.findById(orderId);
+
+        if(order.status == 1 && order.waiting_resp == true) {
+            traveler.assigned_orders.push(orderId); // add the order to the assigned_orders array
+            order.status = 2;
+            order.waiting_resp = false;
+            await order.save();
+            await traveler.save(); // save the updated traveler object to the database
+        }
+
+        res.status(200).json({ message: 'Order assigned successfully' });
+    } catch (err) {
+        res.status(400).json({ message: 'Failed to assign order' });
+    }
+}
