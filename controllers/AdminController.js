@@ -130,6 +130,22 @@ const sendOrderAcceptEmail = async (email, name, lastname, pname, orderid, order
 
 
 
+const aws = require('aws-sdk');
+const multer = require('multer');
+const multerS3 = require('multer-s3');
+
+aws.config.update({
+    secretAccessKey: process.env.ACCESS_SECRET,
+    accessKeyId: process.env.ACCESS_KEY,
+    region: process.env.REGION
+})
+
+const BUCKET = process.env.BUCKET
+const s3 = new aws.S3();
+
+
+
+
 
 
 
