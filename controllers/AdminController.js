@@ -392,3 +392,21 @@ module.exports.setcost_post = async (req, res) => {
          res.status(400).json( {message: 'Order not found'})
     }
 }
+
+
+
+module.exports.revoke_access_post = async (req, res) => {
+    const travelerId = req.params.travelerId;
+    const traveler = Traveler.findById(travelerId);
+    if(traveler){
+        try{
+            traveler.active = false;
+            traveler.revoked = true;
+            await traveler.save();
+        }catch(err){
+            console.log(err);
+        }
+    }else{
+        res.status(400).json({ message: 'Traveler does not exist'})
+    }
+}
