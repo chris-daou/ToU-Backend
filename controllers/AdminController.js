@@ -235,3 +235,74 @@ module.exports.get_pendingOrders_get= async (req, res) => {
     res.send(pendingOrders);
 }
 
+
+
+module.exports.get_anorder_get = async (req, res) => {
+    const anOrdrerId = req.params.orderid;
+    const anOrder = Order.findById(anOrdrerId);
+    res.send(anOrder);
+}
+
+
+
+module.exports.get_waitingpending_get = async (req, res) => {
+    const orders = await Order.find({status: 0, waiting_resp: true});
+    res.send(orders);
+}
+
+
+
+module.exports.getActiveTravelers_get = async (req, res) => {
+    try{
+        const activeTravelers = await Traveler.find({active: true, provided_pickup: false, revoked: false});
+        if(activeTravelers.length>0){
+            res.status(200).json(activeTravelers);
+        }else{
+            res.status(404).json({message: 'No active travelers were found.'})
+        }
+    }catch(err){
+        console.log(err);
+        res.status(500).json({ message: 'Server Error Occured'})
+    }
+    
+}
+
+
+
+module.exports.assign_order_post = async (req, res) =>{
+    const orderId = req.params.orderid;
+    const travelerId = req.params.travelerid;
+    const order = await Order.findById(orderId);
+    const traveler = await Traveler.findById(travelerId);
+    
+    if(order && traveler && traveler.active==true && !traveler.revoked && traveler.provided_pickup==false){
+        try{
+            if(order.cost==null){
+                res.status(400).send('Please assign a cost to this order before assigning it');
+                return;
+            }
+            order.traveler = travelerId;
+            order.waiting_resp = true;
+            traveler.new_orders.push(orderId);
+            order.status = 1;
+            await order.save();
+            await traveler.save();
+            
+            const productId = order.item;
+            const product = await Product.findById(productId);
+            const pname = product.title;
+            const clientId = order.client;
+            const client = await User.findById(clientId);
+            sendOrderAcceptEmail(client.email, client.name, client.lastname, pname, orderId, order.cost);
+            sendAssignmentEmail(traveler.email, traveler.name, traveler.lastname);
+            res.status(200).json('Successfully Assigned Order & sent email to client and traveler');
+        }catch(err){
+            console.log(err);
+        }
+    }else{
+        res.status(404).json({ message: 'Order or Traveler not found.'})
+    }
+
+
+}
+
