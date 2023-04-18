@@ -38,6 +38,24 @@ let transporter = nodemailer.createTransport({
 }
 
 
+const send2to3EmailClient = (email, name, lastname, pname) => {
+    let mailOptions = {
+        from: 'donotreply.tou.lebanon@outlook.com', // your email address
+        to: email, // recipient's email address
+        subject: 'ToU: Order rejected',
+        text: 'Dear ' + name + ' ' + lastname + ',\n\n' + 'This email has been sent to let you know that your requested order:\n'+ pname +'\nhas been acquired by the traveler!. \n' + 'Best regards,\n'
+        };
+      transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+          console.log(error);
+        } else {
+          console.log('Email sent: ' + info.response);
+          console.log(link);
+        }
+      });
+}
+
+
 
 
 
