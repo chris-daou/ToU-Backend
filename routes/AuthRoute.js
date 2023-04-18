@@ -2,20 +2,20 @@ const { Router } = require('express');
 const authController = require('../controllers/AuthController');
 const rpfpController = require('../controllers/PassresetController');
 const tauthController = require('../controllers/TravelerauthContoller');
-const trpfpController = require('../controllers/TpassresetController');
+// const trpfpController = require('../controllers/TpassresetController');
 
 const router = Router();
 
 //User
 //login+signup
-router.get("/signup", authController.singup_get);
+// router.get("/signup", authController.singup_get);
 router.post("/signup", authController.singup_post);
-router.get("/login", authController.login_get);
+// router.get("/login", authController.login_get);
 router.post("/login", authController.login_post);
 router.get('/logout', authController.logout_get);
 
 //forgot-password
-router.get("/forgot-password", rpfpController.fp_get);
+// router.get("/forgot-password", rpfpController.fp_get);
 router.post("/forgot-password", rpfpController.fp_post);
 router.get("/reset-password/:id/:token", rpfpController.rp_get);
 router.post("/reset-password/:id/:token", rpfpController.rp_post);
