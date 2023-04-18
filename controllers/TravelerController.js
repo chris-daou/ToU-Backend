@@ -68,3 +68,69 @@ module.exports.reject_order = async (req, res) => {
         res.status(400).json({ message: 'Failed to assign order' });
     }
 }
+
+module.exports.cancel_flight = async (req, res) => {
+    const travelerId = req.traveler._id;
+            const traveler = await Traveler.findById(travelerId);
+    try{
+        for (let i = 0; i < traveler.new_orders.length; i++) {
+            const order = await Order.findById(traveler.new_orders[i]);
+            order.traveler = "";
+            order.waiting_resp = false;
+            await order.save();
+            let mailOptions = {
+                from: 'donotreply.tou.lebanon@outlook.com', // your email address
+                to: trav.email, // recipient's email address
+                subject: 'ToU: Order back to pending',
+                text: 'Dear ' + (await User.findById(order.client).name) + ' ' + (await User.findById(order.client).lastname) + ',\n\n' + 'Your order has been canceled by the traveler. It is now back to pending.\nFor more information, please contact us.\n\n' + 'Best regards,\n' + 'The ToU Team'
+            };
+            await new Promise((resolve, reject) => {
+                transporter.sendMail(mailOptions, (error, info) => {
+                    if (error) {
+                        console.log(error);
+                        reject(error);
+                    } else {
+                        console.log('Email sent: ' + info.response);
+                        console.log(link);
+                        resolve();
+                    }
+                });
+            });
+        };
+        for (let i = 0; i < traveler.assigned_orders.length; i++) {
+            const order = await Order.findById(traveler.assigned_orders[i]);
+            order.traveler = "";
+            order.waiting_resp = false;
+            order.status = 1;
+            order.estimated_arrival = "";
+            await order.save();
+            let mailOptions = {
+                from: 'donotreply.tou.lebanon@outlook.com', // your email address
+                to: trav.email, // recipient's email address
+                subject: 'ToU: Order back to pending',
+                text: 'Dear ' + (await User.findById(order.client).name) + ' ' + (await User.findById(order.client).lastname) + ',\n\n' + 'Your order has been canceled by the traveler. It is now back to pending.\nFor more information, please contact us.\n\n' + 'Best regards,\n' + 'The ToU Team'
+            };
+            await new Promise((resolve, reject) => {
+                transporter.sendMail(mailOptions, (error, info) => {
+                    if (error) {
+                        console.log(error);
+                        reject(error);
+                    } else {
+                        console.log('Email sent: ' + info.response);
+                        console.log(link);
+                        resolve();
+                    }
+                });
+            }); 
+        };
+        const canceled = traveler.canceled_orders.concat(traveler.assigned_orders, traveler.new_orders);
+        traveler.active = false;
+        traveler.new_orders = [];
+        traveler.assigned_orders = [];
+        traveler.canceled_orders = canceled;
+        await traveler.save();
+    }
+    catch{
+        res.status(400).json({ message: 'Failed to cancel flight' });
+    }
+};
