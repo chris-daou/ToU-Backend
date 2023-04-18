@@ -143,7 +143,36 @@ aws.config.update({
 const BUCKET = process.env.BUCKET
 const s3 = new aws.S3();
 
+module.exports.getTravelers_get = async (req, res) => {
+    const travelers = await Traveler.find({approved: true});
+    res.send(travelers);
+}
 
+
+
+module.exports.download_proof_get = async (req, res) => {
+    const orderId = req.params.orderid;
+    const order = await Order.findById(orderId);
+
+    if(order){
+        try{
+            const filename = order.proof;
+            if(!filename){
+                res.send({message: 'A proof has not been sent by the Traveler'})
+                return;
+            }
+            console.log(filename);
+            const x = await s3.getObject({Bucket: BUCKET, Key: filename}).promise();
+    
+            res.send(x.Body);
+    
+        }catch(err){
+            console.log(err);
+        }
+    }else{
+        res.status(404).json({ message: 'Order not found.'})
+    }
+}
 
 
 
