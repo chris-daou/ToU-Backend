@@ -4,7 +4,7 @@ const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const cheerio = require('cheerio');
 const request = require('request-promise')
-const { requireAuth, checkUser } = require('../middleware/authMiddleware');
+const { requireAuth, checkUser } = require('../middleware/Middleware');
 const nodemailer = require('nodemailer');
 const { copy } = require('../routes/AdminRoute');
 

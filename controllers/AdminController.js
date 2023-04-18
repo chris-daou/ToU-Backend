@@ -3,7 +3,7 @@ const Order = require('../models/Order');
 const User = require('../models/User');
 const Traveler = require('../models/Traveler');
 const jwt = require('jsonwebtoken');
-const { requireAuth, checkUser } = require('../middleware/authMiddleware');
+const { requireAuth, checkUser } = require('../middleware/Middleware');
 const nodemailer = require('nodemailer');
 require('dotenv').config();
 

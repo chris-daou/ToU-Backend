@@ -5,7 +5,7 @@ const Traveler = require('../models/Traveler');
 const jwt = require('jsonwebtoken');
 const cheerio = require('cheerio');
 const request = require('request-promise')
-const { requireAuth, checkUser } = require('../middleware/authMiddleware');
+const { requireAuth, checkUser } = require('../middleware/Middleware');
 const nodemailer = require('nodemailer');
 require('dotenv').config();
 const aws = require('aws-sdk');

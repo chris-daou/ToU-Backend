@@ -1,8 +1,8 @@
 const { Router } = require('express');
-const authController = require('../controllers/authController');
-const rpfpController = require('../controllers/passresetController');
-const tauthController = require('../controllers/travelerauthContoller');
-const trpfpController = require('../controllers/tpassresetController');
+const authController = require('../controllers/AuthController');
+const rpfpController = require('../controllers/PassresetController');
+const tauthController = require('../controllers/TravelerauthContoller');
+const trpfpController = require('../controllers/TpassresetController');
 
 const router = Router();
 
