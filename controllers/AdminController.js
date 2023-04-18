@@ -229,3 +229,9 @@ module.exports.update_delivery_status_post = async (req, res) => {
 }
 
 
+
+module.exports.get_pendingOrders_get= async (req, res) => {
+    const pendingOrders = await Order.find({status: 0});
+    res.send(pendingOrders);
+}
+
