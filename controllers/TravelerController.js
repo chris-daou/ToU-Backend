@@ -103,19 +103,27 @@ module.exports.accept_order = async (req, res) => {
 }
 
 module.exports.reject_order = async (req, res) => {
-    const travelerId = req.params.id;
+    const travelerId = req.traveler._id;
     const orderId = req.params.id;
+
     try {
         const traveler = await Traveler.findById(travelerId);
         const order = await Order.findById(orderId);
-        if(order.status == 1 && order.waiting_resp == true) {
-            traveler.assigned_orders.push(orderId); // add the order to the assigned_orders array
+
+        if(order.status == 0 && order.waiting_resp == true && traveler.new_orders.includes(orderId)) {
+            let index = traveler.new_orders.indexOf(orderId);
+            if (index !== -1) {
+                traveler.new_orders = traveler.new_orders.splice(index, 1);
+            }
             order.waiting_resp = false;
+            order.traveler = null;
             await order.save();
             await traveler.save(); // save the updated traveler object to the database
         }
+
         res.status(200).json({ message: 'Order rejected' });
     } catch (err) {
+        console.log(err.message);
         res.status(400).json({ message: 'Failed to assign order' });
     }
 }
