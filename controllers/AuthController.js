@@ -15,4 +15,47 @@ let transporter = nodemailer.createTransport({
       pass: '*31&pCbE' // your email password
     }
   });
-S
+
+  const handleErrors = (err) => {
+    //console.log(err.message, err.code);//err.code is for the user
+    let errors = {
+        email: '', password: ''
+    }//populate this with an email error and a password error from 'err' (check in terminal)
+
+    //incorrect email
+    if(err.message === 'incorrect email'){
+        errors.email = 'that email is not registered'
+    }
+    //Unverified email
+    if(err.message === 'email not verified'){
+        errors.email = 'email is not verified'
+    }
+    //incorrect password
+    if(err.message === 'incorrect password'){
+        errors.password = 'that password is incorrect';
+    }
+    //account blocked
+    if(err.message === 'user blocked'){
+        errors.email = 'This account has been freezed due to excess of failed login attempts. Try again later.'
+        return errors;
+    }
+    
+    //duplicate error code
+    if(err.code===11000){
+        errors.email = 'that email is already registered';
+        return errors;
+    }
+
+
+    //validation errors
+     if(err.message.includes('user validation failed')){
+        //console.log(err); in the terminal, an error object will be returned, this is the object we want to tackle
+        //console.log(Object.values(err.errors))//Object.values is used to only get the values of specified attribute that will be inside the 'properties' field.
+        
+        Object.values(err.errors).forEach(({properties}) => {   //similar to forEach(err) then err.properties
+            errors[properties.path] = properties.message;
+        })   
+    }
+
+    return errors;
+}
