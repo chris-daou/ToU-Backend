@@ -109,3 +109,40 @@ module.exports.getActiveOrder_get = async (req, res) => {
         res.status(404).json( { message: 'Client or Order Not Found'})
     }
 }
+
+module.exports.complete_order_post = async (req, res) => {
+    const clientId = req.user._id;
+    const client = User.findById(clientId);
+    const orderId = req.params.orderid;
+    const order = Order.findById(orderId);
+
+    if(client && order && client.active_orders.includes(orderId) && order.status==6){
+        try{
+            order.status = 7;
+            const travelerId = order.traveler;
+            const traveler = await Traveler.findById(travelerId);
+            const prodId = order.title;
+            const prod = await Product.findById(prodId);
+
+            let index = traveler.assigned_orders.indexOf(orderId);
+            if (index !== -1) {
+                traveler.new_orders.splice(index, 1);
+            }
+            traveler.completed_orders.push(orderId);
+            let indexc = client.active_orders.indexOf(orderId);
+            if (indexc !== -1) {
+                client.active_orders.splice(index, 1);
+            }
+            client.completed_orders.push(orderId);
+            await client.save();
+            await traveler.save();
+            sendCompletiontoTraveler(traveler.email, traveler.name, traveler.lastname, prod.title);
+
+            res.status(200).json( {message: 'Successfully Comepleted Order'});
+        }catch(err){
+            console.log(err);
+        }
+    }else{
+        res.status(404).json( { message: 'Client or Order Not Found'})
+    }
+}
