@@ -26,3 +26,51 @@ aws.config.update({
   
 const BUCKET = process.env.BUCKET
 const s3 = new aws.S3();
+
+module.exports.tsignup_post = async (req, res) => {
+    console.log(req.body);
+    const date = Date.now();
+    const upload = multer({
+        storage: multerS3({
+            bucket:BUCKET,
+            s3:s3,
+            acl:'public-read',
+            key:(req, file, cb) => {
+                const filename = date + "-" + file.originalname;
+                cb(null, filename);
+            }
+        })
+    })
+    upload.fields([{ name: 'cv' }, { name: 'id' }])(req, res, async (err) => {
+        if (err) {
+          console.log(err);
+          return res.status(400).send({ error: err.message });
+        }
+    try{
+        const data = JSON.parse(req.body.otherData);
+        const { name, lastname, gender, phone, nationality, email} = data;
+        const traveler = await Traveler.create({ name, lastname, gender, phone, nationality, email});
+        traveler.cv = req.files['cv'][0].key;
+        traveler.identification = req.files['id'][0].key;
+        traveler.save();
+        let mailOptions = {
+            from: 'donotreply.tou.lebanon@outlook.com', // your email address
+            to: email, // recipient's email address
+            subject: 'ToU Traveler Rgistration',
+            text: 'Dear ' + name + ' ' + lastname + ',\n\n' + 'Thank you for applying to be a traveler with ToU. Your application has been received and will be reviewed by our team. You will be notified by email once your application has been approved.\n\n' + 'Best regards,\n' + 'ToU Team'
+          };
+        transporter.sendMail(mailOptions, (error, info) => {
+            if (error) {
+              console.log(error);
+            } 
+            else {
+              console.log('Email sent: ' + info.response);
+            }
+          });
+        res.send(traveler);
+    }catch (err){
+        console.log(err);
+        res.send({result : false});
+    }
+    });
+};
