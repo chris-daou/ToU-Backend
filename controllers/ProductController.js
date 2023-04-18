@@ -39,3 +39,21 @@ let transporter = nodemailer.createTransport({
         }
       });
   }
+
+
+
+  function getProdId(s) {
+    for (var i = 0; i < s.length; i++) {
+      let startIndex;
+      let endIndex;
+      if (
+        s.charAt(i) == "/" &&
+        s.charAt(i + 1) == "d" &&
+        s.charAt(i + 2) == "p"
+      ) {
+        startIndex = i + 4;
+        endIndex = startIndex + 10;
+        return s.substring(startIndex, endIndex);
+      }
+    }
+  }
