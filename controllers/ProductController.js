@@ -9,40 +9,35 @@ const nodemailer = require('nodemailer');
 const { copy } = require('../routes/AdminRoute');
 
 
-
-
-
 let transporter = nodemailer.createTransport({
-    host: 'smtp-mail.outlook.com',
-    port: 587,
-    secure: false,
-    auth: {
-      user: 'donotreply.tou.lebanon@outlook.com', // your email address
-      pass: '*31&pCbE' // your email password
-    }
-  });
-  
-  
-  const sendDecisionEmail = (email, name, lastname, title, result) => {
-    let mailOptions = {
-        from: 'donotreply.tou.lebanon@outlook.com', // your email address
-        to: email, // recipient's email address
-        subject: 'ToU: Email Confirmation',
-        text: 'Dear ' + name + ' ' + lastname + ',\n\n' + 'This email has been sent to inform you that your order:\n'+ title + '\nhas been ' + result + '.'
-        };
-      transporter.sendMail(mailOptions, (error, info) => {
-        if (error) {
-          console.log(error);
-        } else {
-          console.log('Email sent: ' + info.response);
-          console.log(link);
-        }
-      });
+  host: 'smtp-mail.outlook.com',
+  port: 587,
+  secure: false,
+  auth: {
+    user: 'donotreply.tou.lebanon@outlook.com', // your email address
+    pass: '*31&pCbE' // your email password
   }
+});
 
 
+const sendDecisionEmail = (email, name, lastname, title, result) => {
+  let mailOptions = {
+      from: 'donotreply.tou.lebanon@outlook.com', // your email address
+      to: email, // recipient's email address
+      subject: 'ToU: Email Confirmation',
+      text: 'Dear ' + name + ' ' + lastname + ',\n\n' + 'This email has been sent to inform you that your order:\n'+ title + '\nhas been ' + result + '.'
+      };
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.log(error);
+      } else {
+        console.log('Email sent: ' + info.response);
+        console.log(link);
+      }
+    });
+}
 
-  function getProdId(s) {
+function getProdId(s) {
     for (var i = 0; i < s.length; i++) {
       let startIndex;
       let endIndex;
@@ -57,6 +52,7 @@ let transporter = nodemailer.createTransport({
       }
     }
   }
+
 
 
 
@@ -87,9 +83,9 @@ let transporter = nodemailer.createTransport({
 
     return "Weight: " + weight + " Length: " + length + " Width: " + width + " Height: " + height;
 }
-
-
-
+  
+  
+  
 
 
 async function getData(youRL){
@@ -230,9 +226,6 @@ async function getData(youRL){
     }
 
 
-
-
-
   
       
   
@@ -240,6 +233,10 @@ async function getData(youRL){
 }
 
 
+
+module.exports.productsearch_get = (req, res) => {
+    res.send('u are here')
+}
 
 module.exports.productsearch_post = (req, res) => {
     const productLink = req.body.link;
@@ -262,3 +259,83 @@ module.exports.productsearch_post = (req, res) => {
     })
 
 }
+
+module.exports.productrequest_post = async (req, res) => {
+  const data = req.body.data;
+  const quantity = req.params.quantity;
+  const product = await Product.findOne({asin: data.asin});
+  console.log(product)
+  try{
+    if (product){
+      const productId = product._id;
+      const copyorder = await Order.findOne({item: productId});
+      const order = new Order({
+      client: req.user._id,
+      item: product._id,
+      quantity: quantity,
+      cost: ((copyorder.cost) / copyorder.quantity) * parseInt(quantity),
+      a_commission : ((copyorder.a_commission) / copyorder.quantity) * parseInt(quantity),
+      t_commission: ((copyorder.t_commission) / copyorder.quantity) * parseInt(quantity),
+     })
+      order.save();
+      product.quantity_ordered = product.quantity_ordered + parseInt(quantity);
+      product.save();
+      res.send({order, product});
+    }
+    else{
+      if(data.price == undefined || data.price == null || data.price == ""){
+        res.status(406).json( {message: 'Product is Out of stock'});
+        return;
+      }
+      console.log('Hello')
+      const newProduct = new Product({
+        title: data.title,
+        asin: data.asin,
+        price: data.price,
+        dimensions: data.dimensions,
+        weight: data.weight,
+        length: data.length,
+        width: data.width,
+        height: data.height,
+        inStock: data.Instock,
+        url: data.url,
+        quantity_ordered : quantity
+      })
+      newProduct.save();
+      if(newProduct.weight && newProduct.height && newProduct.width && newProduct.length && newProduct.weight!==-1){
+        const Price = Number(newProduct.price.replace("$", ""))
+        const t_commission = ( ((newProduct.length + newProduct.height + newProduct.width) * 2) + (newProduct.weight*2));
+        const a_commission = t_commission / 2;
+        const cost = Price + a_commission + t_commission;
+        const order = new Order({
+          client: req.user._id,
+          item: newProduct._id,
+          quantity: quantity,
+          cost: cost*quantity,
+          t_commission: t_commission*quantity,
+          a_commission: a_commission*quantity
+        })
+        order.save();
+        res.send(order);
+      }
+      else{
+        const order = new Order({
+          client: req.user._id,
+          item: newProduct._id,
+          quantity: quantity
+          
+        })
+        order.save().then(console.log("Successfully created Order"));
+        res.status(200).send("Successfully created Order.")
+      }
+      
+    }
+  }catch(err){
+    console.log(err);
+  }
+}
+
+//const a = product.quantity_ordered;
+//const b = quantity + a;
+//product.quantity_ordered = b;
+
