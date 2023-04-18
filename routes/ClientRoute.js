@@ -1,10 +1,16 @@
 const { Router } = require('express');
 const clientController = require('../controllers/ClientController');
+const productController = require('../controllers/productController');
+
 const { requireAuth, checkUser } = require('../middleware/Middleware');
 
 
 const router = Router();
+router.get("client/home/searchproduct", checkUser, productController.productsearch_get);
 
+router.post("client/home/searchproduct", productController.productsearch_post);
+
+router.post("client/home/searchproduct/:asin/:quantity", checkUser, productController.productrequest_post);
 
 router.get('/confirmorder/:token/:orderid', clientController.confirm_order_get);
 //Client confirms their order
