@@ -306,3 +306,31 @@ module.exports.assign_order_post = async (req, res) =>{
 
 }
 
+
+
+module.exports.rejectorder_post = async (req, res) => {
+    const orderId = req.params.orderid;
+    const order = Order.findById(orderId);
+    if(order){
+        try{
+            if(order.status == 0 && order.waiting_resp == false && order.traveler == null){
+                order.status = -1;
+                order.save().then(console.log(order));
+                const productId = order.item;
+                const product = await Product.findById(productId);
+                const pname = product.title;
+                const clientId = order.client;
+                const client = await User.findById(clientId);
+                sendOrderRejectionEmail(client.email, client.name, client.lastname, pname)
+                res.status(200).json( {message: 'Order has been successfully rejecetd'})
+            }else{
+                res.status(418).json( {message: 'Cannot reject order as it has already been processed.'})
+            }
+        }catch(err){
+            
+        }
+    }else{
+        res.status(400).json( {message: 'Order not found'})
+    }
+}
+
