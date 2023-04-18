@@ -275,23 +275,6 @@ const upload = multer({
     })
 })
 
-module.exports.uploadProof_post = async (req, res) => {
-    upload.single('file')(req, res, async (err) => {
-      if (err) {
-        console.log(err);
-        return res.status(400).send({ error: err.message });
-      }
-      const orderId = req.params.orderid;
-      const order = await Order.findById(orderId);
-
-      const filename = req.file.key; 
-      
-      order.proof = filename;
-      order.save().then(console.log(order));
-      
-      res.send('Done');
-    });
-};
 
 
 const upload2 = multer({
@@ -308,3 +291,20 @@ const upload2 = multer({
 
 
 
+module.exports.uploadProof_post = async (req, res) => {
+    upload2.single('file')(req, res, async (err) => {
+      if (err) {
+        console.log(err);
+        return res.status(400).send({ error: err.message });
+      }
+      const orderId = req.params.orderid;
+      const order = await Order.findById(orderId);
+
+      const filename = req.file.key; 
+      
+      order.proof = filename;
+      order.save().then(console.log(order));
+      
+      res.send('Done');
+    });
+  };
