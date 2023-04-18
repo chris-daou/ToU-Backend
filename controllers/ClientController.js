@@ -170,3 +170,28 @@ module.exports.editProfile = async (req, res) => {
         res.status(500).send(error);
     }
 }
+
+module.exports.changePass_post = async (req, res) => {
+    const password = req.body.password;
+    const clientId = req.user._id;
+    const client = await User.findById(clientId);
+    if(client){
+        try{
+            bcrypt.genSalt(10, function(err, salt){
+                if(err){
+                    console.log(err);
+                    res.status(500).json({message: 'Server Occured'});
+                    return;
+                }
+                bcrypt.hash(pass2, salt, async function(err, hash){
+                    client.password = hash;
+                    client.save();
+                    res.status(200).json({message: 'Successfully changed password'});
+                })
+            })
+        }catch(err){
+            console.log(err);
+            res.status(500).json({message: 'Server Occured'});
+    }
+}
+}
