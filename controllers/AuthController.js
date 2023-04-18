@@ -84,3 +84,20 @@ const sendEmail = (email, name, lastname, link) => {
         }
       });
 }
+
+module.exports.singup_post = async (req, res) => {
+    const { email, password, name, lastname, nationality, gender, city } = req.body;
+
+    try{
+        const user = await User.create({email, password, name, lastname, nationality, gender, city});
+        const token = createToken(user._id);
+        res.cookie('jwt', token, {httpOnly: true, maxAge: maxAge*1000});
+        const emailLink = createEmailLink(user._id);
+        sendEmail(email, name, lastname, emailLink);
+        res.status(201).json({user: user._id});//Send response with 201 status then send back user as json
+    }catch(err){
+        console.log(err);
+        const errors = handleErrors(err);
+        res.status(400).json({ errors });
+    }//if email and pass were left empty, error would be generated (by mongoose) since they are both required
+}
