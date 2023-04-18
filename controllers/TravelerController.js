@@ -173,3 +173,33 @@ module.exports.providePickup_post = async (req, res) => {
     traveler.save();
     res.send('Done');
 };
+
+const upload1 = multer({
+    storage: multerS3({
+        bucket:BUCKET,
+        s3:s3,
+        acl:'public-read',
+        key:(req, file, cb) => {
+            const filename = req.params.orderid + '_receipt';
+            cb(null, filename);
+        } 
+    })
+})
+
+module.exports.uploadReceipt_post = async (req, res) => {
+    upload1.single('file')(req, res, async (err) => {
+      if (err) {
+        console.log(err);
+        return res.status(400).send({ error: err.message });
+      }
+      const orderId = req.params.orderid;
+      const order = await Order.findById(orderId);
+
+      const filename = req.file.key; 
+      
+      order.receipt = filename;
+      order.save().then(console.log(order));
+      
+      res.send('Done');
+    });
+};
