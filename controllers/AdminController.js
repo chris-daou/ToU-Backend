@@ -189,8 +189,11 @@ module.exports.rejectProof_post = async( req, res) => {
             sendProofEmailRejected(email, name, lastname);
             res.status(200).send('Successfully Rejected the Proof Upload')
         }catch(err){
-
+            console.log(err);
+            res.status(500).json( {message: 'Sever Error Occured'})
         }
+    }else{
+        res.status(404).json({message: 'Order not found'})
     }
 }
 
