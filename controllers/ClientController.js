@@ -155,3 +155,18 @@ module.exports.getProfile = async (req, res) => {
     }
     res.status(400).json( {message: 'Something went wrong'} )
 }
+
+module.exports.editProfile = async (req, res) => {
+    const clientId = req.user._id;
+    const client = await User.findById(clientId);
+    if(client){
+        try {
+            const user = await User.findByIdAndUpdate(clientId, req.body, { new: true });
+            res.send(user);
+          } catch (error) {
+            res.status(500).send(error);
+          }
+    }else{
+        res.status(500).send(error);
+    }
+}
