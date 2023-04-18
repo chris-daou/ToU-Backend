@@ -8,7 +8,6 @@ const nodemailer = require('nodemailer');
 require('dotenv').config();
 
 
-
 let transporter = nodemailer.createTransport({
     host: 'smtp-mail.outlook.com',
     port: 587,
@@ -18,6 +17,19 @@ let transporter = nodemailer.createTransport({
       pass: '*31&pCbE' // your email password
     }
   });
+
+// let transporter1 = nodemailer.createTransport({
+//   host: 'smtp-mail.outlook.com',
+//   port: 587,
+//   secure: false,
+//   auth: {
+//     user: 'donotreply.tou.lebanon@outlook.com', // your email address
+//     pass: '*31&pCbE' // your email password
+//   }
+// });
+
+
+
 
 
   const sendProofEmailApproved = (email, name, lastname) => {
@@ -38,6 +50,7 @@ let transporter = nodemailer.createTransport({
 }
 
 
+
 const send2to3EmailClient = (email, name, lastname, pname) => {
     let mailOptions = {
         from: 'donotreply.tou.lebanon@outlook.com', // your email address
@@ -55,7 +68,26 @@ const send2to3EmailClient = (email, name, lastname, pname) => {
       });
 }
 
-
+const sendAssignmentEmail = async (email, name, lastname) => {
+    let mailOptions = {
+        from: 'donotreply.tou.lebanon@outlook.com', // your email address
+        to: email, // recipient's email address
+        subject: 'ToU: New Order',
+        text: 'Dear ' + name + ' ' + lastname + ',\n\n' + 'This email has been sent to let you know that you have been assigned a new order.\n\nPlease make sure to accept or reject the order as soon as possible' + 'Best regards,\n'
+        };
+        await new Promise((resolve, reject) => {
+            transporter.sendMail(mailOptions, (error, info) => {
+                if (error) {
+                    console.log(error);
+                    reject(error);
+                } else {
+                    console.log('Email sent: ' + info.response);
+                    console.log(link);
+                    resolve();
+                }
+            });
+        });
+}
 
 
 const sendProofEmailRejected = async (email, name, lastname) => {
@@ -98,7 +130,6 @@ const sendOrderRejectionEmail = (email, name, lastname, pname) => {
 }
 
 
-
 const sendOrderAcceptEmail = async (email, name, lastname, pname, orderid, order_cost) => {
     const secret = process.env.SECRET_CONFIRM_ORDER
     const payload= {
@@ -130,6 +161,10 @@ const sendOrderAcceptEmail = async (email, name, lastname, pname, orderid, order
 
 
 
+
+
+
+
 const aws = require('aws-sdk');
 const multer = require('multer');
 const multerS3 = require('multer-s3');
@@ -143,11 +178,12 @@ aws.config.update({
 const BUCKET = process.env.BUCKET
 const s3 = new aws.S3();
 
+
+
 module.exports.getTravelers_get = async (req, res) => {
     const travelers = await Traveler.find({approved: true});
     res.send(travelers);
 }
-
 
 
 module.exports.download_proof_get = async (req, res) => {
@@ -197,7 +233,6 @@ module.exports.rejectProof_post = async( req, res) => {
     }
 }
 
-
 module.exports.update_delivery_status_post = async (req, res) => {
     const orderId = req.params.orderid;
     const order = await Order.findById(orderId);
@@ -229,7 +264,6 @@ module.exports.update_delivery_status_post = async (req, res) => {
 }
 
 
-
 module.exports.get_pendingOrders_get= async (req, res) => {
     const pendingOrders = await Order.find({status: 0});
     res.send(pendingOrders);
@@ -244,11 +278,11 @@ module.exports.get_anorder_get = async (req, res) => {
 }
 
 
-
 module.exports.get_waitingpending_get = async (req, res) => {
     const orders = await Order.find({status: 0, waiting_resp: true});
     res.send(orders);
 }
+
 
 
 
@@ -266,8 +300,6 @@ module.exports.getActiveTravelers_get = async (req, res) => {
     }
     
 }
-
-
 
 module.exports.assign_order_post = async (req, res) =>{
     const orderId = req.params.orderid;
@@ -305,7 +337,6 @@ module.exports.assign_order_post = async (req, res) =>{
 
 
 }
-
 
 
 module.exports.rejectorder_post = async (req, res) => {
@@ -365,7 +396,6 @@ module.exports.revoke_order_post = async (req, res) => {
 
 
 
-
 module.exports.setcost_post = async (req, res) => {
     const orderId = req.params.orderid;
     const order = await Order.findById(orderId);
@@ -413,27 +443,27 @@ module.exports.revoke_access_post = async (req, res) => {
 
 
 
+
 module.exports.deleteTraveler = async (req, res) => {
-    const travelerId = req.params.travelerid;
-  
-    try {
-      const traveler = await Traveler.findById(travelerId);
-      
-      if (traveler) {
-        await traveler.remove();
-        res.status(200).json({ message: 'Traveler has been successfully deleted.' });
-      } else {
-        res.status(404).json({ message: 'Traveler not found.' });
-      }
-    } catch (err) {
-      console.log(err);
-      res.status(500).json({ message: 'An error occurred while deleting the traveler.' });
+  const travelerId = req.params.travelerid;
+
+  try {
+    const traveler = await Traveler.findById(travelerId);
+    
+    if (traveler) {
+      await traveler.remove();
+      res.status(200).json({ message: 'Traveler has been successfully deleted.' });
+    } else {
+      res.status(404).json({ message: 'Traveler not found.' });
     }
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: 'An error occurred while deleting the traveler.' });
   }
+}
 
 
-
-  module.exports.getrevoked_list = async(req, res) => {
+module.exports.getrevoked_list = async(req, res) => {
     try{
         const list = await Traveler.find( {revoked: true});
         if(list.length>0){
@@ -444,7 +474,6 @@ module.exports.deleteTraveler = async (req, res) => {
         console.log(err);
     }
 }
-
 
 module.exports.getrevokedTraveler_get = async(req, res) => {
     const travelerId = req.params.travelerid;
@@ -480,3 +509,5 @@ module.exports.unrevoke_post = async(req, res) => {
         res.status(500).json({message: 'Server Error occured'});
     }
 }
+
+
