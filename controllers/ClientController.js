@@ -34,3 +34,28 @@ const sendCompletiontoTraveler = (email, name, lastname, pname) => {
         }
     });
 }
+
+module.exports.confirm_order_get = async (req, res) => {
+    const token = req.params.token;
+    const orderId = req.params.orderid;
+    const secret = process.env.SECRET_CONFIRM_ORDER;
+    const payload = jwt.verify(token, secret);
+    if(payload){
+        try{
+            const order = await Order.findById(orderId);
+            console.log(order)
+            if(order.status == 1 && order.traveler!=null){
+                order.client_confirmed = true;
+                order.status = 2;
+                order.save().then(console.log(order));
+                res.status(200).json( {message: 'Successfully Confirmed Order'});
+            }else{
+                res.status(400).json({ message: 'Order has not yet been approved by an admin'});
+                
+            }
+        }catch(err){
+            console.log(err);
+        }
+    }
+    else res.status(404).json( {message: 'Confirmation Date Expired'});
+}
