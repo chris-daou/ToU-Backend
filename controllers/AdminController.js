@@ -334,3 +334,32 @@ module.exports.rejectorder_post = async (req, res) => {
     }
 }
 
+
+
+module.exports.revoke_order_post = async (req, res) => {
+    const orderId = req.params.orderid;
+    const order = Order.findById(orderId);
+    if(order){
+        try{
+            const traveler = Traveler.findById(order.traveler);
+            if(traveler.new_orders.includes(orderId) && order.waiting_resp == true){
+                order.traveler = null;
+                order.waiting_resp = false,
+                order.save();
+                let index = traveler.new_orders.indexOf(orderId);
+                if (index !== -1) {
+                    traveler.new_orders = traveler.new_orders.splice(index, 1);
+                    traveler.save();
+                }
+                console.log(order);
+                console.log(traveler);
+                res.status(200).json( {message: 'Order has been successfully revoked'})
+            }
+        }catch(err){
+            console.log(err);
+        }
+    }else{
+        res.status(400).json( {message: 'Order not found'})
+    }
+}
+
