@@ -87,3 +87,151 @@ let transporter = nodemailer.createTransport({
 
     return "Weight: " + weight + " Length: " + length + " Width: " + width + " Height: " + height;
 }
+
+
+
+
+
+async function getData(youRL){
+    const response = await request({
+      uri: youRL,
+      headers: {
+        authority: "www.amazon.com",
+        method: "GET",
+        // 'path' : '/Nike-Barcelona-Soccer-2021-2022-X-Large/dp/B08T6LRBVR/ref=sr_1_9?crid=5CNPO2HL3UD1&keywords=fcb%2Bjersey&qid=1676139460&sprefix=fcb%2Bjers%2Caps%2C352&sr=8-9&th=1',
+        scheme: "https",
+        accept:
+          "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,/;q=0.8,application/signed-exchange;v=b3;q=0.9",
+        "accept-encoding": "gzip, deflate, br",
+        "accept-language": "en-US,en;q=0.9",
+        "cache-control": "max-age=0",
+        "device-memory": "8",
+        downlink: "4.3",
+        dpr: "1",
+        ect: "4g",
+        // 'referer': "https://www.amazon.com/s?k=fcb+jersey&crid=5CNPO2HL3UD1&sprefix=fcb+jers%2Caps%2C352&ref=nb_sb_noss_2",
+        rtt: "200",
+        "sec-ch-device-memory": "8",
+        "sec-ch-dpr": "1",
+        "sec-ch-ua":
+          '"Not_A Brand";v="99", "Google Chrome";v="109", "Chromium";v="109"',
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "Windows",
+        "sec-ch-ua-platform-version": "10.0.0",
+        "sec-ch-viewport-width": "683",
+        "sec-fetch-dest": "document",
+        "sec-fetch-mode": "navigate",
+        "sec-fetch-site": "same-origin",
+        "sec-fetch-user": "?1",
+        "upgrade-insecure-requests": "1",
+        "user-agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36",
+        "viewport-width": "683",
+      },
+      gzip: true,
+    });
+    
+  
+    let $ = cheerio.load(response);
+  
+    //Getting Title
+    const title = $("span[id='productTitle']").text().trim();
+  
+    // Getting the price
+    let prices = [];
+    let price;
+    $(
+      "div[id^='corePrice_desktop'] span[class='a-offscreen'],div[id^='corePrice_feature'] span[class='a-offscreen']"
+    ).each((i, elm) => {
+      let p = $(elm).text();
+      if (p.includes("$")) {
+        price = p;
+        return false;
+      }
+    });
+  
+    //Getting the Image source
+    let imageSource = $("#landingImage").attr("src");
+    if(imageSource==undefined){
+      script =  $('script[data-a-state=\'{"key":"desktop-landing-image-data"}\']');
+      var data = JSON.parse(script.html());
+      if(data!=null) imageSource = data.landingImageUrl;
+    }
+  
+    //Getting ID
+    const asin = getProdId(youRL);
+  
+    //Getting the dimensions;
+    let dimensions;
+    $(
+      "div[id^='detailBullets_feature'] span[class='a-list-item']"
+    ).each((i, elm) => {
+      let dd = $(elm).text();
+      if(dd.includes("Package Dimensions") || dd.includes("Product Dimensions")){
+        dimensions = dd.trim();
+        return false;
+      };
+    });
+    if(dimensions==undefined){
+      $(
+        "table[id^='productDetails'] td[class='a-size-base prodDetAttrValue']"
+      ).each((i, elm) => {
+        let ddd = $(elm).text();
+        if(ddd.includes("Package Dimensions") || ddd.includes("Product Dimensions") ||ddd.includes(" x ")){
+          dimensions = ddd.trim();
+          return false;
+        };
+      });
+    }
+    if(dimensions==undefined){
+      $(
+        "div[class='a-section a-spacing-small a-spacing-top-small'] span[class='a-size-base']"
+      ).each((i, elm) => {
+        let dddd = $(elm).text();
+        if(dddd.includes("Package Dimensions") || dddd.includes("Product Dimensions") ||dddd.includes(" x ")){
+          dimensions = dddd.trim();
+          return false;
+        };
+      });
+    }
+    //Determine stock
+    var Instock = true;
+    if(price==undefined) Instock = false;
+  
+    
+
+    if(dimensions){
+      const dim = extractProductInfo(dimensions);
+      const weight = dim.substring(dim.indexOf("Weight: ") + 8, dim.indexOf(" Length"));
+      const length = dim.substring(dim.indexOf("Length: ") + 8, dim.indexOf(" Width"));
+      const width = dim.substring(dim.indexOf("Width: ") + 7, dim.indexOf(" Height"));
+      const height = dim.substring(dim.indexOf("Height: ") + 8);
+      return {
+        title,
+        imageSource,
+        price,
+        dimensions,
+        weight,
+        length,
+        width,
+        height,
+        asin,
+        Instock
+      }
+    }else{
+      return {
+        title,
+        imageSource,
+        price,
+        dimensions,
+        asin,
+        Instock
+      }
+    }
+
+
+  
+      
+  
+    
+}
