@@ -51,23 +51,53 @@ let transporter = nodemailer.createTransport({
 }
 
 
-  module.exports.accept_order = async (req, res) => {
-    const travelerId = req.params.id;
-    const orderId = req.params.id;
+module.exports.accept_order = async (req, res) => {
+    const travelerId = req.traveler._id;
+    const orderId = req.params.orderid;
+
     try {
         const traveler = await Traveler.findById(travelerId);
         const order = await Order.findById(orderId);
-
-        if(order.status == 1 && order.waiting_resp == true) {
+        if(!order.client_confirmed){
+            res.status(400).json({ message:'Please wait until the client has confirmed their order'});
+            return;
+        }
+        
+        if(order.status == 2 && order.waiting_resp == true && traveler.new_orders.includes(orderId) && order.client_confirmed) {
+            console.log('here')
+            let index = traveler.new_orders.indexOf(orderId);
+            console.log(index);
+            if (index !== -1) {
+                console.log("HEERE");
+                traveler.new_orders.splice(index, 1);
+                console.log(traveler.new_orders);
+                await traveler.save();
+            }
             traveler.assigned_orders.push(orderId); // add the order to the assigned_orders array
-            order.status = 2;
+            
             order.waiting_resp = false;
+            const clientId = order.client;
+            const client = await User.findById(clientId);
+            client.active_orders.push(orderId);
+            await client.save();
+            const prodId = order.item;
+            const prod = Product.findById(prodId);
+
+            const ticketId = traveler.ticket;
+            const ticket = Ticket.findById(ticketId);
+            let date_string = ticket.departure;
+            let date_format = "DDMMM";
+            let date = moment(date_string, date_format);
+            let new_date = date.add(7, 'days');
+            let new_date_string = new_date.format(date_format);
+
+            sendAssignedEmailClient(client.email, client.name, client.lastname, prod.title, date_string, new_date_string);
             await order.save();
             await traveler.save(); // save the updated traveler object to the database
+            res.status(200).json({message: 'Successfully Accepted Order'});
         }
-
-        res.status(200).json({ message: 'Order assigned successfully' });
     } catch (err) {
+        console.log(err);
         res.status(400).json({ message: 'Failed to assign order' });
     }
 }
