@@ -58,3 +58,26 @@ module.exports.fp_post = async (req, res) => {
         res.send("Reset link has been sent ");
     }
 }
+
+module.exports.rp_get = async (req, res) => {
+    const id = req.params.id;
+    const token = req.params.token;
+    console.log(id);
+    const user = await User.findById(id);
+    if(user){
+        console.log(user);
+        const secret = process.env.SECRET_JWT + user.password;
+        try{
+            const payload = jwt.verify(token, secret);
+            if(payload) res.status(200).json(payload);
+            else{
+                res.status(400).json({error: "Something went wrong"});
+            }
+        }catch(err){
+            console.log(err);
+        }
+    }
+    else{
+        res.send("Oops something went wrong")
+    }
+}
