@@ -198,6 +198,40 @@ module.exports.rejectProof_post = async( req, res) => {
 }
 
 
+module.exports.update_delivery_status_post = async (req, res) => {
+    const orderId = req.params.orderid;
+    const order = await Order.findById(orderId);
+
+    if(order){
+        try{
+            const travelerId = order.traveler;
+            const traveler = await Traveler.findById(travelerId);
+            const name = traveler.name;
+            const lastname = traveler.lastname;
+            const email = traveler.email;
+            if(order.status==2){
+                order.status = 3;
+                order.save().then(sendProofEmailApproved(email, name, lastname));
+
+                const prodId = order.item;
+                const prod = Product.findById(prodId);
+                const clientId = order.client;
+                const client = User.findById(clientId);
+                send2to3EmailClient(client.email, client.name, client.lastname, prod.title)
+                res.send({order, incremented: true});
+            }
+        }catch(err){
+            console.log(err);
+        }
+    }else{
+        res.status(404).json({ message: 'Order not found.'})
+    }
+}
 
 
+
+module.exports.get_pendingOrders_get= async (req, res) => {
+    const pendingOrders = await Order.find({status: 0});
+    res.send(pendingOrders);
+}
 
