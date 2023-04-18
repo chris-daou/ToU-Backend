@@ -91,3 +91,21 @@ module.exports.getActiveClient_get = async (req, res) => {
         res.status(404).json( { message: 'Client Not Found'})
     }
 }
+
+module.exports.getActiveOrder_get = async (req, res) => {
+    const clientId = req.user._id;
+    const client = await User.findById(clientId);
+    const orderId = req.params.orderid;
+    const order = await Order.findById(orderId);
+
+    if(client && order && client.active_orders.includes(orderId)){
+        try{
+            const status = order.status;
+            res.status(200).json( {status});
+        }catch(err){
+            console.log(err);
+        }
+    }else{
+        res.status(404).json( { message: 'Client or Order Not Found'})
+    }
+}
