@@ -410,3 +410,23 @@ module.exports.revoke_access_post = async (req, res) => {
         res.status(400).json({ message: 'Traveler does not exist'})
     }
 }
+
+
+
+module.exports.deleteTraveler = async (req, res) => {
+    const travelerId = req.params.travelerid;
+  
+    try {
+      const traveler = await Traveler.findById(travelerId);
+      
+      if (traveler) {
+        await traveler.remove();
+        res.status(200).json({ message: 'Traveler has been successfully deleted.' });
+      } else {
+        res.status(404).json({ message: 'Traveler not found.' });
+      }
+    } catch (err) {
+      console.log(err);
+      res.status(500).json({ message: 'An error occurred while deleting the traveler.' });
+    }
+  }
