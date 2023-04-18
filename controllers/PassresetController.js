@@ -32,4 +32,29 @@ let transporter = nodemailer.createTransport({
       });
 }
 
-
+module.exports.fp_post = async (req, res) => {
+    const email = req.body.email;
+    console.log(email);
+    if(email!=null){
+        let user = await User.findOne({email: email});
+        if(!user) {
+            user = await Traveler.findOne({email: email});
+        }
+        console.log(user);
+        if(!user) res.send("Email does not exist.");
+        const secret = process.env.SECRET_JWT + user.password;
+        const payload = {
+        name: user.name,
+        lastname: user.lastname,
+        email: user.email,
+        id: user._id,
+        type: user.type
+        }
+        const token = jwt.sign(payload, secret, {expiresIn: '15m'});
+        const link = 'http://localhost:5000/reset-password/'+user._id+"/"+token;
+        sendEmail(payload.email, payload.name, payload.lastname, link);
+        console.log(link);
+        console.log(payload);
+        res.send("Reset link has been sent ");
+    }
+}
