@@ -99,6 +99,36 @@ const sendOrderRejectionEmail = (email, name, lastname, pname) => {
 
 
 
+const sendOrderAcceptEmail = async (email, name, lastname, pname, orderid, order_cost) => {
+    const secret = process.env.SECRET_CONFIRM_ORDER
+    const payload= {
+        email: email,
+        pname: pname
+    }
+    const token = jwt.sign(payload, secret, {expiresIn: '31d'});
+    const link = 'http://localhost:5000/confirmorder/'+token+'/'+orderid;
+    let mailOptions = {
+        from: 'donotreply.tou.lebanon@outlook.com', // your email address
+        to: email, // recipient's email address
+        subject: 'ToU: Order rejected',
+        text: 'Dear ' + name + ' ' + lastname + ',\n\n' + 'This email has been sent to let you know that your requested order:\n'+ pname +'\nhas been accepted.\n The delivery will cost you '+ order_cost +' \nClick on the link to confirm this order.\n'+link + '\n\nBest regards,\n'
+        };
+        await new Promise((resolve, reject) => {
+            transporter.sendMail(mailOptions, (error, info) => {
+                if (error) {
+                    console.log(error);
+                    reject(error);
+                } else {
+                    console.log('Email sent: ' + info.response);
+                    console.log(link);
+                    resolve();
+                }
+            });
+        });
+}
+
+
+
 
 
 
