@@ -243,3 +243,10 @@ module.exports.get_anorder_get = async (req, res) => {
     res.send(anOrder);
 }
 
+
+
+module.exports.get_waitingpending_get = async (req, res) => {
+    const orders = await Order.find({status: 0, waiting_resp: true});
+    res.send(orders);
+}
+
