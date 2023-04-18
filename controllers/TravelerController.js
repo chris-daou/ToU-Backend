@@ -308,3 +308,22 @@ module.exports.uploadProof_post = async (req, res) => {
       res.send('Done');
     });
   };
+
+
+
+  const sendOnTheWayEmail = (email, name, lastname, pname) => {
+    let mailOptions = {
+        from: 'donotreply.tou.lebanon@outlook.com', // your email address
+        to: email, // recipient's email address
+        subject: 'ToU: Your Order is on its way!',
+        text: 'Dear ' + name + ' ' + lastname + ',\n\n' + 'This email has been sent to let you know that your order:\n'+ pname+'\nIs being shipped and will be soon delivered ToU!\n\nBest regards,\n'
+        };
+      transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+          console.log(error);
+        } else {
+          console.log('Email sent: ' + info.response);
+          console.log(link);
+        }
+      });
+}
