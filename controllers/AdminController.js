@@ -143,7 +143,10 @@ aws.config.update({
 const BUCKET = process.env.BUCKET
 const s3 = new aws.S3();
 
-
+module.exports.getTravelers_get = async (req, res) => {
+    const travelers = await Traveler.find({approved: true});
+    res.send(travelers);
+}
 
 
 
