@@ -1,9 +1,10 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const authRoutes = require('./routes/authRoute');
-const productRoutes = require('./routes/productRoute');
-const travRoutes = require('./routes/travelerRoute');
+const authRoutes = require('./routes/AuthRoute');
+// const productRoutes = require('./routes/productRoute');
+// const travRoutes = require('./routes/travelerRoute');
 const AdminRoute = require('./routes/AdminRoute');
+const ClientRoute = require('./routes/ClientRoute');
 const cookieParser = require('cookie-parser');
 const { requireAuth, checkUser } = require('./middleware/authMiddleware');
 const cors = require('cors');
@@ -24,6 +25,8 @@ app.set('view engine', 'ejs');
 mongoose.set('strictQuery', false);
 mongoose.connect("mongodb+srv://vickenk8:lF4PbJg2PKGljdDM@cluster0.3zxbi6j.mongodb.net/test", {useNewUrlParser: true, useUnifiedTopology: true});
 
+
+
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', 'exp://192.168.16.101:19000/');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
@@ -34,13 +37,11 @@ app.use((req, res, next) => {
 app.use(cors());
 
 // routes
-app.get('*', checkUser);
-app.get('/', (req, res) => res.render('home'));
-app.get('/smoothies', requireAuth,(req, res) => res.render('smoothies'));
 app.use(authRoutes);
-app.use(productRoutes);
-app.use(travRoutes);
+// app.use(productRoutes);
+// app.use(travRoutes);
 app.use(AdminRoute);
+app.use(ClientRoute);
 
 
 //Create Admin
