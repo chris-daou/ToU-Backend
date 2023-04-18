@@ -430,3 +430,17 @@ module.exports.deleteTraveler = async (req, res) => {
       res.status(500).json({ message: 'An error occurred while deleting the traveler.' });
     }
   }
+
+
+
+  module.exports.getrevoked_list = async(req, res) => {
+    try{
+        const list = await Traveler.find( {revoked: true});
+        if(list.length>0){
+            res.status(200).json(list);
+        }
+        res.status(400).json({ message: 'The are no revoked travelers'});
+    }catch(err){
+        console.log(err);
+    }
+}
