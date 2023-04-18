@@ -329,7 +329,7 @@ module.exports.uploadProof_post = async (req, res) => {
 }
 
 
-module.exports.marksent = async(req, res) => {
+module.exports.markshipped = async(req, res) => {
     const orderId = req.params.orderid;
     const order = await Order.findById(orderId);
     if(order){
@@ -353,3 +353,22 @@ module.exports.marksent = async(req, res) => {
         res.status(404).json({message: 'Order not Found.'})
     }
 }
+
+const sendArrivedEmail = (email, name, lastname, pname) => {
+    let mailOptions = {
+        from: 'donotreply.tou.lebanon@outlook.com', // your email address
+        to: email, // recipient's email address
+        subject: 'ToU: Your Order is in Lebanon!',
+        text: 'Dear ' + name + ' ' + lastname + ',\n\n' + 'This email has been sent to let you know that your order:\n'+ pname+'\nLanded in Lebanon and will soon be on its way ToU!\n\nBest regards,\n'
+        };
+      transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+          console.log(error);
+        } else {
+          console.log('Email sent: ' + info.response);
+          console.log(link);
+        }
+      });
+}
+
+
