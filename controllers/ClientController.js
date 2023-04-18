@@ -75,3 +75,19 @@ module.exports.getPendingClient_get = async (req, res) => {
         res.status(404).json( { message: 'Client Not Found'})
     }
 }
+
+module.exports.getActiveClient_get = async (req, res) => {
+    const clientId = req.user._id;
+    const client = await User.findById(clientId);
+
+    if(client){
+        try{
+            const list = client.active_orders;
+            res.status(200).json( {aorders: list});
+        }catch(err){
+            console.log(err);
+        }
+    }else{
+        res.status(404).json( { message: 'Client Not Found'})
+    }
+}
