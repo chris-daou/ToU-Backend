@@ -230,8 +230,35 @@ async function getData(youRL){
     }
 
 
+
+
+
   
       
   
     
+}
+
+
+
+module.exports.productsearch_post = (req, res) => {
+    const productLink = req.body.link;
+    
+    getData(productLink).then((data) => {
+        const details = {
+            title : data.title,
+            price : data.price,
+            asin : data.asin,
+            imageSource : data.imageSource,
+            dimensions : data.dimensions,
+            weight: data.weight,
+            length: data.length,
+            width: data.width,
+            height: data.height,
+            Instock : data.Instock,
+            url: productLink
+        }
+        res.json(details);
+    })
+
 }
