@@ -59,3 +59,19 @@ module.exports.confirm_order_get = async (req, res) => {
     }
     else res.status(404).json( {message: 'Confirmation Date Expired'});
 }
+
+module.exports.getPendingClient_get = async (req, res) => {
+    const clientId = req.user._id;
+    const client = await User.findById(clientId);
+
+    if(client){
+        try{
+            const list = client.pending_orders;
+            res.status(200).json( {porders: list});
+        }catch(err){
+            console.log(err);
+        }
+    }else{
+        res.status(404).json( { message: 'Client Not Found'})
+    }
+}
