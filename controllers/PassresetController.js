@@ -81,3 +81,49 @@ module.exports.rp_get = async (req, res) => {
         res.send("Oops something went wrong")
     }
 }
+
+module.exports.rp_post = async (req, res) => {
+    const id = req.params.id;
+    const token = req.params.token;
+    const pass = req.body.password;
+    const pass2 = req.body.password2;
+    console.log(id);
+    const user = await User.findById(id);
+    if(user){
+        console.log(user);
+        const secret = process.env.SECRET_JWT + user.password;
+        try{
+            const payload = jwt.verify(token, secret);
+            if(payload){
+                if(pass===pass2){
+                    bcrypt.genSalt(10, function(err, salt){
+                        bcrypt.hash(pass2, salt, async function(err, hash){
+                            if(payload.type == "User"){
+                                await User.findOneAndUpdate(
+                                    { email: user.email },
+                                    { password: hash }
+                                );
+                            }
+                            else if(payload){
+                                await Traveler.findOneAndUpdate(
+                                    { email: user.email },
+                                    { password: hash }
+                                )
+                            }
+                            res.send("Successfully changed Password");
+                        })
+                    })
+                }else{
+                    res.send("The password and its confirmation do not match");
+                }
+            }else{
+                res.send("Payload Time Expired.")
+            }
+        }catch(err){
+            console.log(err);
+        }
+    }
+    else{
+        console.log("Something went wrong.. Oops!")
+    }
+}
