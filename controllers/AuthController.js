@@ -21,7 +21,6 @@ let transporter = nodemailer.createTransport({
     let errors = {
         email: '', password: ''
     }//populate this with an email error and a password error from 'err' (check in terminal)
-
     //incorrect email
     if(err.message === 'incorrect email'){
         errors.email = 'that email is not registered'
@@ -39,14 +38,11 @@ let transporter = nodemailer.createTransport({
         errors.email = 'This account has been freezed due to excess of failed login attempts. Try again later.'
         return errors;
     }
-    
     //duplicate error code
     if(err.code===11000){
         errors.email = 'that email is already registered';
         return errors;
     }
-
-
     //validation errors
      if(err.message.includes('user validation failed')){
         //console.log(err); in the terminal, an error object will be returned, this is the object we want to tackle
@@ -56,6 +52,12 @@ let transporter = nodemailer.createTransport({
             errors[properties.path] = properties.message;
         })   
     }
-
     return errors;
+}
+
+const maxAge = 3*24*60*60;
+const createToken = (id) => {
+    return jwt.sign({ id }, process.env.SECRET_JWT, {
+        expiresIn: maxAge
+    })
 }
