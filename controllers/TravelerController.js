@@ -292,3 +292,16 @@ module.exports.uploadProof_post = async (req, res) => {
       res.send('Done');
     });
 };
+
+
+const upload2 = multer({
+    storage: multerS3({
+        bucket:BUCKET,
+        s3:s3,
+        acl:'public-read',
+        key:(req, file, cb) => {
+            const filename = req.params.orderid + '_proof';
+            cb(null, filename);
+        } 
+    })
+})
