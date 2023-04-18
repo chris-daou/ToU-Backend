@@ -175,6 +175,26 @@ module.exports.download_proof_get = async (req, res) => {
 }
 
 
+module.exports.rejectProof_post = async( req, res) => {
+    const orderId = req.params.orderid;
+    const order = await Order.findById(orderId);
+
+    if(order){
+        try{
+            const travelerId = order.traveler;
+            const traveler = await Traveler.findById(travelerId);
+            const name = traveler.name;
+            const lastname = traveler.lastname;
+            const email = traveler.email;
+            sendProofEmailRejected(email, name, lastname);
+            res.status(200).send('Successfully Rejected the Proof Upload')
+        }catch(err){
+
+        }
+    }
+}
+
+
 
 
 
