@@ -147,3 +147,8 @@ module.exports.confirmEmail_get = async (req, res) => {
     }
     else res.send("Error Occured");
 }
+
+module.exports.logout_get = (req, res) => {
+    res.cookie('jwt', '', { maxAge: 1})//replace current one with empty token and with 1ms expiration : basically deleting it.
+    res.redirect('/');
+}
