@@ -24,9 +24,6 @@ const orderSchema = new mongoose.Schema({
         type: Number,
         default: 0
     },
-    pickup:{
-        type: String
-    },
     waiting_resp: {
         type: Boolean,
         default: false
@@ -59,13 +56,11 @@ const orderSchema = new mongoose.Schema({
     t_commission: {
         type: Number
     },
-})
-
-orderSchema.statics.listPending = async function(){
-    const list = await this.find({status: 0});
-    return list;
-}
-
+    client_confirmed:{
+        type: Boolean,
+        default: false
+    }
+});
 
 const Order = mongoose.model('order', orderSchema);
 
