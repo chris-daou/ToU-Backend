@@ -101,3 +101,35 @@ module.exports.singup_post = async (req, res) => {
         res.status(400).json({ errors });
     }//if email and pass were left empty, error would be generated (by mongoose) since they are both required
 }
+
+module.exports.login_post = async (req, res) => {
+    const { email, password } = req.body;
+    console.log("i am logging in. hello")
+    try{
+        
+        const user = await User.login(email, password);
+        if(user){
+            const token = createToken(user._id);
+            res.cookie('uauthjwt', token, {httpOnly: true, maxAge: maxAge*1000});//storing the token in the browser
+            res.status(200).json({user: user._id, type: user.type});
+        }
+        else{
+            const trav = await Traveler.login(email, password);
+            if(trav){
+                const token = createToken(trav._id);
+                res.cookie('tauthjwt', token, {httpOnly: true, maxAge: maxAge*1000});
+                res.status(200).json({traveler: trav._id, type: trav.type})
+            }
+        }
+        
+    }catch(err){
+        const errors = handleErrors(err);
+        if(err.message == 'user blocked'){
+            res.status(403).json({ errors });
+        }
+        else{
+            res.status(400).json({ errors });
+        };
+    }
+    //!!!!!!!!!!!!!!!!! Send different thing if blocked !!!!!!!!!!!!!!!!!!!!!!!!
+}
