@@ -363,3 +363,32 @@ module.exports.revoke_order_post = async (req, res) => {
     }
 }
 
+
+
+
+module.exports.setcost_post = async (req, res) => {
+    const orderId = req.params.orderid;
+    const order = await Order.findById(orderId);
+    if(order){
+        try{
+            const productId = order.item;
+            const product = await Product.findById(productId);
+            const price =  parseInt(product.price.replace("$", ""));
+            const cost = parseInt(req.body.cost);
+            console.log(price, cost)
+            const t_commission = parseInt((cost - price)/3)*2;
+            const a_commission = parseInt(t_commission)/2;
+            console.log(t_commission);
+            order.cost = cost;
+            order.a_commission = parseInt(a_commission);
+            order.t_commission = parseInt(t_commission);
+            order.save();
+            console.log(order);
+            res.status(200).json( {message: 'Order cost has been successfully updated.'})
+        }catch(err){
+
+        }
+    }else{
+         res.status(400).json( {message: 'Order not found'})
+    }
+}
