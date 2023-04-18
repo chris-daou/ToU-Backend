@@ -159,6 +159,13 @@ module.exports.confirmEmail_get = async (req, res) => {
 }
 
 module.exports.logout_get = (req, res) => {
-    res.cookie('jwt', '', { maxAge: 1})//replace current one with empty token and with 1ms expiration : basically deleting it.
-    res.redirect('/');
-}
+    if (req.cookies.uauthjwt) {
+      res.cookie('uauthjwt', '', { maxAge: 1 });
+      res.send('User Cookie Deleted');
+    } else if (req.cookies.tauthjwt) {
+      res.cookie('tauthjwt', '', { maxAge: 1 });
+      res.send('Traveler Cookie Deleted');
+    } else {
+      res.send('No token found to delete');
+    }
+  };
