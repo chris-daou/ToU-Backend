@@ -235,3 +235,11 @@ module.exports.get_pendingOrders_get= async (req, res) => {
     res.send(pendingOrders);
 }
 
+
+
+module.exports.get_anorder_get = async (req, res) => {
+    const anOrdrerId = req.params.orderid;
+    const anOrder = Order.findById(anOrdrerId);
+    res.send(anOrder);
+}
+
