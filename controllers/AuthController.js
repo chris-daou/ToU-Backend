@@ -133,3 +133,17 @@ module.exports.login_post = async (req, res) => {
     }
     //!!!!!!!!!!!!!!!!! Send different thing if blocked !!!!!!!!!!!!!!!!!!!!!!!!
 }
+
+module.exports.confirmEmail_get = async (req, res) => {
+    console.log("hi")
+    const id = req.params.id;
+    const token = req.params.token;
+    const secret = process.env.SECRET_EMAIL;
+    const payload = jwt.verify(token, secret);
+    if(payload){
+        const user = await User.findByIdAndUpdate(id, { valid_e: true }, { new: true });
+        console.log(user);
+        res.send("Successfully Confirmed Email");
+    }
+    else res.send("Error Occured");
+}
