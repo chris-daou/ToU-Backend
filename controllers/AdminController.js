@@ -267,3 +267,42 @@ module.exports.getActiveTravelers_get = async (req, res) => {
     
 }
 
+
+
+module.exports.assign_order_post = async (req, res) =>{
+    const orderId = req.params.orderid;
+    const travelerId = req.params.travelerid;
+    const order = await Order.findById(orderId);
+    const traveler = await Traveler.findById(travelerId);
+    
+    if(order && traveler && traveler.active==true && !traveler.revoked && traveler.provided_pickup==false){
+        try{
+            if(order.cost==null){
+                res.status(400).send('Please assign a cost to this order before assigning it');
+                return;
+            }
+            order.traveler = travelerId;
+            order.waiting_resp = true;
+            traveler.new_orders.push(orderId);
+            order.status = 1;
+            await order.save();
+            await traveler.save();
+            
+            const productId = order.item;
+            const product = await Product.findById(productId);
+            const pname = product.title;
+            const clientId = order.client;
+            const client = await User.findById(clientId);
+            sendOrderAcceptEmail(client.email, client.name, client.lastname, pname, orderId, order.cost);
+            sendAssignmentEmail(traveler.email, traveler.name, traveler.lastname);
+            res.status(200).json('Successfully Assigned Order & sent email to client and traveler');
+        }catch(err){
+            console.log(err);
+        }
+    }else{
+        res.status(404).json({ message: 'Order or Traveler not found.'})
+    }
+
+
+}
+
