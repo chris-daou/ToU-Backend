@@ -57,3 +57,33 @@ let transporter = nodemailer.createTransport({
       }
     }
   }
+
+
+
+  function extractProductInfo(str) {
+    let weight = -1;
+    let length = -1;
+    let width = -1;
+    let height = -1;
+
+    // Extract weight
+    const weightRegex = /(\d+(\.\d+)?)\s*(pounds|lb|lbs|ounces|oz)/i;
+    const weightMatch = str.match(weightRegex);
+    if (weightMatch) {
+        weight = parseFloat(weightMatch[1]);
+        if (weightMatch[3].toLowerCase() === 'ounces' || weightMatch[3].toLowerCase() === 'oz') {
+            weight /= 16;
+        }
+    }
+
+    // Extract dimensions
+    const dimensionsRegex = /(\d+(\.\d+)?)\s*x\s*(\d+(\.\d+)?)\s*x\s*(\d+(\.\d+)?)\s*(inches|in)/i;
+    const dimensionsMatch = str.match(dimensionsRegex);
+    if (dimensionsMatch) {
+        length = parseFloat(dimensionsMatch[1]);
+        width = parseFloat(dimensionsMatch[3]);
+        height = parseFloat(dimensionsMatch[5]);
+    }
+
+    return "Weight: " + weight + " Length: " + length + " Width: " + width + " Height: " + height;
+}
