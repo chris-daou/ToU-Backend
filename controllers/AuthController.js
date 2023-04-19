@@ -3,6 +3,7 @@ const User = require('../models/User');
 const Traveler = require('../models/Traveler');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
+const { Token } = require('aws-sdk');
 require('dotenv').config();
 
 
@@ -55,12 +56,7 @@ let transporter = nodemailer.createTransport({
     return errors;
 }
 
-const maxAge = 3*24*60*60;
-const createToken = (id) => {
-    return jwt.sign({ id }, process.env.SECRET_JWT, {
-        expiresIn: maxAge
-    })
-}
+
 
 const createEmailLink = (id) => {
     const emailToken = jwt.sign({id}, process.env.SECRET_EMAIL, {expiresIn: '2d'});
@@ -84,6 +80,21 @@ const sendEmail = (email, name, lastname, link) => {
         }
       });
 }
+
+
+const createAccessToken = (id, userType) => {
+    const expiresIn = '1h'; // Access token expires in 1 hour
+    const secret = process.env.SECRET_JWT;
+    const token = jwt.sign({ id, userType }, secret, { expiresIn });
+    return token;
+};
+  
+const createRefreshToken = (id, userType) => {
+  const expiresIn = '7d'; // Refresh token expires in 7 days
+  const secret = process.env.SECRET_REFRESH_JWT;
+  const token = jwt.sign({ id, userType }, secret, { expiresIn });
+  return token;
+};
 
 module.exports.singup_post = async (req, res) => {
   const { email, password, name, lastname, nationality, gender, city, phone_number } = req.body;
@@ -116,9 +127,17 @@ module.exports.login_post = async (req, res) => {
       const user = await User.login(email, password);
       console.log(user);
       if(user){
-          const token = createToken(user._id);
-          res.cookie('uauthjwt', token, {httpOnly: true, maxAge: maxAge*1000});//storing the token in the browser
-          res.status(200).json({user: user._id, type: user.type});
+        const accessToken = createAccessToken(user._id, user.type);
+        const refreshToken = createRefreshToken(user._id, user.type);
+        const ARtoken = new Token({
+            user: user._id,
+            refreshToken: refreshToken,
+            accessToken: accessToken,
+            type: user.type
+        })
+        ARtoken.save();
+        res.cookie('uauthjwt', accessToken, {httpOnly: true});
+        res.status(200).json({user: user._id, type: user.type, token: accessToken});
       }
       else{
           console.log('hi');
@@ -169,3 +188,16 @@ module.exports.logout_get = (req, res) => {
       res.send('No token found to delete');
     }
   };
+
+
+
+
+
+
+
+
+
+
+//   const token = createToken(user._id);
+        //   res.cookie('uauthjwt', token, {httpOnly: true, maxAge: maxAge*1000});//storing the token in the browser
+        //   res.status(200).json({user: user._id, type: user.type});

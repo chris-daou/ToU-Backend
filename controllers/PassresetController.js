@@ -46,6 +46,8 @@ module.exports.fp_post = async (req, res) => {
         }
         const secret = process.env.SECRET_JWT;
         const payload = {
+        name: user.name,
+        lastname: user.lastname,
         email: user.email,
         id: user._id,
         type: user.type

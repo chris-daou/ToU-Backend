@@ -14,15 +14,9 @@ const tokenSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  expiresAt: {
-    type: Date,
-    required: true,
-  },
-  createdAt: {
-    type: Date,
-    required: true,
-    default: Date.now,
-  },
+  type: {
+    type: String
+  }
 });
 
 const Token = mongoose.model('Token', tokenSchema);
