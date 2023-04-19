@@ -326,7 +326,11 @@ module.exports.productrequest_post = async (req, res) => {
           quantity: quantity
           
         })
-        order.save().then(console.log("Successfully created Order"));
+        
+        order.save();
+        const client = await User.findById(req.user._id);
+        client.pending_orders.push(order._id);
+        client.save();
         res.status(200).send("Successfully created Order.")
       }
       
