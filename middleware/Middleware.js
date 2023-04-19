@@ -79,10 +79,66 @@ const checkRPtoken = async (req, res, next) => {
     }
 }
 
+const requireTravelerAuth = async (req, res, next) => {
+    const token = req.cookies.tauthjwt;
+  
+    if (!token) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
+  
+    try {
+      const accessPayload = jwt.verify(token, process.env.SECRET_JWT);
+  
+      if (!accessPayload) {
+        return res.status(401).json({ message: 'Unauthorized' });
+      }
+  
+      // Check if the token has expired
+      const currentTime = Math.floor(Date.now() / 1000);
+      if (accessPayload.exp < currentTime) {
+        // Get the refresh token from the database
+        const ARtoken = await Token.findOne({ accessToken: token });
+  
+        if (!ARtoken) {
+          return res.status(401).json({ message: 'Unauthorized' });
+        }
+  
+        // Verify the refresh token and get its payload
+        const decodedRefreshToken = jwt.verify(ARtoken.refreshToken, process.env.SECRET_REFRESH_JWT);
+        
+
+        // Generate a new access token and save it in the database
+        if(decodedRefreshToken && decodedRefreshToken.exp < currentTime){
+            const newAccessToken = jwt.sign(
+                { id: decodedRefreshToken.user, type: decodedRefreshToken.type },
+                process.env.SECRET_JWT,
+                { expiresIn: '1h' }
+              );
+              await Token.updateOne(
+                { refreshToken: ARtoken.refreshToken },
+                { accessToken: newAccessToken }
+              );
+        
+              // Set the new access token in the response cookie
+              res.cookie('tauthjwt', newAccessToken, { httpOnly: true });
+              next();
+        }else{
+            return res.status(401).json({ message: 'Unauthorized' });
+        }
+      }
+  
+      // Pass the user ID to the next middleware
+      req.userId = accessPayload.id;
+      req.userType = accessPayload.type;
+      next();
+    } catch (err) {
+      console.log(err);
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
+  };
 
 
-
-const requireAuth = async (req, res, next) => {
+const requireClientAuth = async (req, res, next) => {
     const token = req.cookies.uauthjwt;
   
     if (!token) {
@@ -111,7 +167,7 @@ const requireAuth = async (req, res, next) => {
         
 
         // Generate a new access token and save it in the database
-        if(decodedRefreshToken){
+        if(decodedRefreshToken && decodedRefreshToken.exp < currentTime){
             const newAccessToken = jwt.sign(
                 { id: decodedRefreshToken.user, type: decodedRefreshToken.type },
                 process.env.SECRET_JWT,
@@ -124,6 +180,7 @@ const requireAuth = async (req, res, next) => {
         
               // Set the new access token in the response cookie
               res.cookie('uauthjwt', newAccessToken, { httpOnly: true });
+              next();
         }else{
             return res.status(401).json({ message: 'Unauthorized' });
         }
@@ -138,7 +195,7 @@ const requireAuth = async (req, res, next) => {
       return res.status(401).json({ message: 'Unauthorized' });
     }
   };
-module.exports = {requireAuth, checkUser, checkTraveler, checkRPtoken, requireAuth};
+module.exports = {requireTravelerAuth, checkUser, checkTraveler, checkRPtoken, requireClientAuth};
 
 
 

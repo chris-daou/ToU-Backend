@@ -1,7 +1,7 @@
 const { Router } = require('express');
 
 const travController = require('../controllers/TravelerController');
-const { checkTraveler } = require('../middleware/Middleware');
+const { checkTraveler, requireTravelerAuth } = require('../middleware/Middleware');
 
 const router = Router();
 
@@ -11,6 +11,8 @@ const router = Router();
 // router.get('/traveler/:id/new-orders')
 
 // router.get('/traveler/:id/new-orders/:order-id/accept')
+router.get('/traveler/home/neworders/:orderid/accept', requireTravelerAuth,travController.accept_order_GET);
+
 router.post('/traveler/home/neworders/:orderid/accept', checkTraveler,travController.accept_order);
 router.post('/traveler/home/neworders/:orderid/reject', travController.reject_order);
 

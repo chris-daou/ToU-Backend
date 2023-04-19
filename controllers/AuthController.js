@@ -3,7 +3,7 @@ const User = require('../models/User');
 const Traveler = require('../models/Traveler');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
-const { Token } = require('aws-sdk');
+const Token = require('../models/Token')
 require('dotenv').config();
 
 
@@ -149,13 +149,22 @@ module.exports.login_post = async (req, res) => {
           }
           const trav = await Traveler.login(email, password);
           if(trav){
-              const token = createToken(trav._id);
-              res.cookie('tauthjwt', token, {httpOnly: true, maxAge: maxAge*1000});
-              res.status(200).json({traveler: trav._id, type: trav.type})
+            const accessToken = createAccessToken(trav._id, trav.type);
+            const refreshToken = createRefreshToken(trav._id, trav.type);
+            const ARtoken = new Token({
+                user: trav._id,
+                refreshToken: refreshToken,
+                accessToken: accessToken,
+                type: trav.type
+            })
+            ARtoken.save();
+            res.cookie('tauthjwt', accessToken, {httpOnly: true});
+            res.status(200).json({user: trav._id, type: trav.type, token: accessToken});
           }
       }
       
   }catch(err){
+    console.log(err);
       const errors = handleErrors(err);
       if(err.message == 'user blocked'){
           res.status(403).json(errors);

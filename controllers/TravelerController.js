@@ -50,7 +50,9 @@ let transporter = nodemailer.createTransport({
       });
 }
 
-
+module.exports.accept_order_GET = async (req, res) => {
+    res.send("You are here. "+req.userId)
+}
 module.exports.accept_order = async (req, res) => {
     const travelerId = req.traveler._id;
     const orderId = req.params.orderid;
