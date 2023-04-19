@@ -48,8 +48,8 @@ module.exports.tsignup_post = async (req, res) => {
         }
     try{
         const data = JSON.parse(req.body.otherData);
-        const { name, lastname, gender, phone, nationality, email} = data;
-        const traveler = await Traveler.create({ name, lastname, gender, phone, nationality, email});
+        const { name, lastname, gender, phone_number, nationality, email} = data;
+        const traveler = await Traveler.create({ name, lastname, gender, phone_number, nationality, email});
         traveler.cv = req.files['cv'][0].key;
         traveler.identification = req.files['id'][0].key;
         traveler.save();
