@@ -2,7 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const authRoutes = require('./routes/AuthRoute');
 // const productRoutes = require('./routes/productRoute');
-// const travRoutes = require('./routes/travelerRoute');
+const TravRoutes = require('./routes/TravelerRoute');
 const AdminRoute = require('./routes/AdminRoute');
 const ClientRoute = require('./routes/ClientRoute');
 const cookieParser = require('cookie-parser');
@@ -38,8 +38,7 @@ app.use(cors());
 
 // routes
 app.use(authRoutes);
-// app.use(productRoutes);
-// app.use(travRoutes);
+app.use(TravRoutes);
 app.use(AdminRoute);
 app.use(ClientRoute);
 

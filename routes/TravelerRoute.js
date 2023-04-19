@@ -18,7 +18,7 @@ router.post('/traveler/home/neworders/:orderid/reject', travController.reject_or
 // router.get('/traveler/:id/active-orders/:order-id')
 router.post("/traveler/home/activeorders/:orderid/uploadproof", travController.uploadProof_post);
 
-router.post('/traveler/home/activeorders/:orderid/markassent', travController.marksent)
+router.post('/traveler/home/activeorders/:orderid/markassent', travController.markshipped)
 
 
 

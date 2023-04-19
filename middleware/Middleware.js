@@ -75,4 +75,34 @@ const checkTraveler = (req, res, next) => {
     }
 }
 
-module.exports = {requireAuth, checkUser, checkTraveler};
+
+
+const checkRPtoken = async (req, res, next) => {
+    const token = req.params.token;
+    if(token){
+        try{
+            const secret = process.env.SECRET_JWT;
+            const payload = jwt.verify(token, secret);
+            if(payload){
+                next();
+            }else{
+                res.status(400).json({message: 'Invalid Token'})
+            }
+        }catch(err){
+            console.log(err);
+            res.status(500).json({message: 'Server Error Occured.'})
+        }
+    }else{
+        res.status(400).json({message: 'Invalid Token'})
+    }
+}
+
+module.exports = {requireAuth, checkUser, checkTraveler, checkRPtoken};
+
+
+
+
+
+
+
+
