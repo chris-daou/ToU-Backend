@@ -62,8 +62,8 @@ module.exports.accept_order = async (req, res) => {
             res.status(400).json({ message:'Please wait until the client has confirmed their order'});
             return;
         }
-        
-        if(order.status == 2 && order.waiting_resp == true && traveler.new_orders.includes(orderId) && order.client_confirmed) {
+
+        if(order.status == 2 && order.waiting_resp == true && traveler.new_orders.includes(orderId) && order.client_confirmed && traveler.ticket) {
             console.log('here')
             let index = traveler.new_orders.indexOf(orderId);
             console.log(index);
