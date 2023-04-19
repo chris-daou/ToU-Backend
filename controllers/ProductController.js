@@ -303,7 +303,7 @@ module.exports.productrequest_post = async (req, res) => {
       newProduct.save();
       if(newProduct.weight && newProduct.height && newProduct.width && newProduct.length && 
         newProduct.weight!==-1 && newProduct.height!==-1 && newProduct.width!==-1 && newProduct.length!==-1){
-        const Price = Number(newProduct.price.replace("$", ""))
+        const Price = parseInt((newProduct.price).replace(/[^\d.]/g, ''));
         const t_commission = ( ((newProduct.length + newProduct.height + newProduct.width) * 2) + (newProduct.weight*2));
         const a_commission = t_commission / 2;
         const cost = Price + a_commission + t_commission;
