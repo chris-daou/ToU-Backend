@@ -41,16 +41,16 @@ module.exports.fp_post = async (req, res) => {
             user = await Traveler.findOne({email: email});
         }
         console.log(user);
-        if(!user) res.send("Email does not exist.");
-        const secret = process.env.SECRET_JWT + user.password;
+        if(!user){
+            res.status(400).json({ message: 'Invalid email'});
+        }
+        const secret = process.env.SECRET_JWT;
         const payload = {
-        name: user.name,
-        lastname: user.lastname,
         email: user.email,
         id: user._id,
         type: user.type
         }
-        const token = jwt.sign(payload, secret, {expiresIn: '15m'});
+        const token = jwt.sign(payload, secret, {expiresIn: '45m'});
         const link = 'http://localhost:5000/reset-password/'+user._id+"/"+token;
         sendEmail(payload.email, payload.name, payload.lastname, link);
         console.log(link);
@@ -60,26 +60,7 @@ module.exports.fp_post = async (req, res) => {
 }
 
 module.exports.rp_get = async (req, res) => {
-    const id = req.params.id;
-    const token = req.params.token;
-    console.log(id);
-    const user = await User.findById(id);
-    if(user){
-        console.log(user);
-        const secret = process.env.SECRET_JWT + user.password;
-        try{
-            const payload = jwt.verify(token, secret);
-            if(payload) res.status(200).json(payload);
-            else{
-                res.status(400).json({error: "Something went wrong"});
-            }
-        }catch(err){
-            console.log(err);
-        }
-    }
-    else{
-        res.send("Oops something went wrong")
-    }
+    res.send('Uareherererere');
 }
 
 module.exports.rp_post = async (req, res) => {
@@ -87,43 +68,46 @@ module.exports.rp_post = async (req, res) => {
     const token = req.params.token;
     const pass = req.body.password;
     const pass2 = req.body.password2;
-    console.log(id);
-    const user = await User.findById(id);
-    if(user){
-        console.log(user);
-        const secret = process.env.SECRET_JWT + user.password;
-        try{
-            const payload = jwt.verify(token, secret);
-            if(payload){
-                if(pass===pass2){
+    const secret = process.env.SECRET_JWT;
+    try{
+        const payload = jwt.verify(token, secret);
+        if(payload){
+            const type = payload.type;
+            if(type=="User"){
+                const user = await User.findById(id);
+                if(user && (pass==pass2)){
                     bcrypt.genSalt(10, function(err, salt){
                         bcrypt.hash(pass2, salt, async function(err, hash){
-                            if(payload.type == "User"){
-                                await User.findOneAndUpdate(
-                                    { email: user.email },
-                                    { password: hash }
-                                );
-                            }
-                            else if(payload){
-                                await Traveler.findOneAndUpdate(
-                                    { email: user.email },
-                                    { password: hash }
-                                )
-                            }
-                            res.send("Successfully changed Password");
+                            await User.findOneAndUpdate({ email: user.email }, { password: hash });
+                            res.status(200).json({message: "Successfully changed Password"});
+                            return;
                         })
                     })
                 }else{
-                    res.send("The password and its confirmation do not match");
+                    res.status(500).json({ message: 'Server Error Occured'});
+                    return;
                 }
-            }else{
-                res.send("Payload Time Expired.")
+            }else if(type == "Traveler"){
+                const traveler = await Traveler.findById(id);
+                if(traveler && (pass==pass2)){
+                    bcrypt.genSalt(10, function(err, salt){
+                        bcrypt.hash(pass2, salt, async function(err, hash){
+                            await Traveler.findOneAndUpdate({ email: traveler.email }, { password: hash });
+                            res.status(200).json({message: "Successfully changed Password"});
+                            return;
+                        })
+                    })
+                }else{
+                    res.status(400).json({ message: 'Invalid Token'});
+                    return;
+                }
             }
-        }catch(err){
-            console.log(err);
+        }else{
+            res.status(400).json({ message: 'Invalid Token'})
         }
-    }
-    else{
-        console.log("Something went wrong.. Oops!")
+    }catch(err){
+        console.log(err);
+        res.status(500).json({ message: 'Server Error Occured'});
+
     }
 }

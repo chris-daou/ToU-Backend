@@ -264,30 +264,48 @@ module.exports.productrequest_post = async (req, res) => {
   const data = req.body.data;
   const quantity = req.params.quantity;
   const product = await Product.findOne({asin: data.asin});
-  console.log(product)
   try{
-    if (product){
+    if (product){//if the product already exists, enter this block
       const productId = product._id;
       const copyorder = await Order.findOne({item: productId});
-      const order = new Order({
-      client: req.user._id,
-      item: product._id,
-      quantity: quantity,
-      cost: ((copyorder.cost) / copyorder.quantity) * parseInt(quantity),
-      a_commission : ((copyorder.a_commission) / copyorder.quantity) * parseInt(quantity),
-      t_commission: ((copyorder.t_commission) / copyorder.quantity) * parseInt(quantity),
-     })
-      order.save();
-      product.quantity_ordered = product.quantity_ordered + parseInt(quantity);
-      product.save();
-      res.send({order, product});
+      if(copyorder.cost){//checking if already existing product has a cost set to it.
+        const order = new Order({
+          client: req.user._id,
+          item: product._id,
+          quantity: quantity,
+          cost: ((copyorder.cost) / copyorder.quantity) * parseInt(quantity),
+          a_commission : ((copyorder.a_commission) / copyorder.quantity) * parseInt(quantity),
+          t_commission: ((copyorder.t_commission) / copyorder.quantity) * parseInt(quantity),
+         })//Order will be created and cost will be set according to quantity.
+          order.save();
+          const client = await User.findById(req.user._id);
+          client.pending_orders.push(order._id);
+          client.save();
+          product.quantity_ordered = product.quantity_ordered + parseInt(quantity);
+          product.save();
+          res.status(200).json({message: 'Successfully Created Order with already existing product and its cost.'});
+          return;
+      }else{//If product copy does not have an existing cost this block will be triggered
+        const order = new Order({
+          client: req.user._id,
+          item: product._id,
+          quantity: quantity
+         })//Order will be created without copying non-existing cost
+          order.save();
+          const client = await User.findById(req.user._id);
+          client.pending_orders.push(order._id);
+          client.save();
+          product.quantity_ordered = product.quantity_ordered + parseInt(quantity);
+          product.save();
+          res.status(200).json({message: 'Successfully Created Order with already existing product.'});
+          return;
+      }
     }
-    else{
-      if(data.price == undefined || data.price == null || data.price == ""){
-        res.status(406).json( {message: 'Product is Out of stock'});
+    else{//Product does not exist in the database
+      if(data.price == undefined || data.price == null || data.price == ""){//If Product has no price
+        res.status(406).json( {message: 'Product is Out of stock'});      //Then it means that product is out of stock
         return;
       }
-      console.log('Hello')
       const newProduct = new Product({
         title: data.title,
         asin: data.asin,
@@ -300,10 +318,11 @@ module.exports.productrequest_post = async (req, res) => {
         inStock: data.Instock,
         url: data.url,
         quantity_ordered : quantity
-      })
+      })//Creating the new Product and saving it in the database
       newProduct.save();
-      if(newProduct.weight && newProduct.height && newProduct.width && newProduct.length && newProduct.weight!==-1){
-        const Price = Number(newProduct.price.replace("$", ""))
+      if(newProduct.weight && newProduct.height && newProduct.width && newProduct.length && 
+        newProduct.weight!==-1 && newProduct.height!==-1 && newProduct.width!==-1 && newProduct.length!==-1){
+        const Price = parseInt((newProduct.price).replace(/[^\d.]/g, ''));
         const t_commission = ( ((newProduct.length + newProduct.height + newProduct.width) * 2) + (newProduct.weight*2));
         const a_commission = t_commission / 2;
         const cost = Price + a_commission + t_commission;
@@ -316,16 +335,25 @@ module.exports.productrequest_post = async (req, res) => {
           a_commission: a_commission*quantity
         })
         order.save();
-        res.send(order);
+        const client = await User.findById(req.user._id);
+        client.pending_orders.push(order._id);
+        client.save();
+        res.status(200).json({message: 'Successfully Created Order with new Product WITH cost.'});
+        return;
       }
       else{
+        console.log("This was triggered!")
         const order = new Order({
           client: req.user._id,
           item: newProduct._id,
           quantity: quantity
           
         })
-        order.save().then(console.log("Successfully created Order"));
+        
+        order.save();
+        const client = await User.findById(req.user._id);
+        client.pending_orders.push(order._id);
+        client.save();
         res.status(200).send("Successfully created Order.")
       }
       

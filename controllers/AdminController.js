@@ -288,7 +288,8 @@ module.exports.get_waitingpending_get = async (req, res) => {
 
 module.exports.getActiveTravelers_get = async (req, res) => {
     try{
-        const activeTravelers = await Traveler.find({active: true, provided_pickup: false, revoked: false});
+        const activeTravelers = await Traveler.find({active: true, provided_pickup: false, revoked: false, ticket: {$ne: null, $ne: undefined}});
+
         if(activeTravelers.length>0){
             res.status(200).json(activeTravelers);
         }else{
@@ -306,8 +307,10 @@ module.exports.assign_order_post = async (req, res) =>{
     const travelerId = req.params.travelerid;
     const order = await Order.findById(orderId);
     const traveler = await Traveler.findById(travelerId);
-    
-    if(order && traveler && traveler.active==true && !traveler.revoked && traveler.provided_pickup==false){
+    if(!order.ticket && traveler.provided_pickup){
+        res.status(400).json({message: 'Traveler has yet to provide Ticket'})
+    }
+    if(order && traveler && traveler.active==true && !traveler.revoked){
         try{
             if(order.cost==null){
                 res.status(400).send('Please assign a cost to this order before assigning it');
