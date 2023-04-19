@@ -287,7 +287,6 @@ module.exports.productrequest_post = async (req, res) => {
         res.status(406).json( {message: 'Product is Out of stock'});
         return;
       }
-      console.log('Hello')
       const newProduct = new Product({
         title: data.title,
         asin: data.asin,
@@ -302,7 +301,8 @@ module.exports.productrequest_post = async (req, res) => {
         quantity_ordered : quantity
       })
       newProduct.save();
-      if(newProduct.weight && newProduct.height && newProduct.width && newProduct.length && newProduct.weight!==-1){
+      if(newProduct.weight && newProduct.height && newProduct.width && newProduct.length && 
+        newProduct.weight!==-1 && newProduct.height!==-1 && newProduct.width!==-1 && newProduct.length!==-1){
         const Price = Number(newProduct.price.replace("$", ""))
         const t_commission = ( ((newProduct.length + newProduct.height + newProduct.width) * 2) + (newProduct.weight*2));
         const a_commission = t_commission / 2;
@@ -319,6 +319,7 @@ module.exports.productrequest_post = async (req, res) => {
         res.send(order);
       }
       else{
+        console.log("This was triggered!")
         const order = new Order({
           client: req.user._id,
           item: newProduct._id,
