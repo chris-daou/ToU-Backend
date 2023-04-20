@@ -136,7 +136,6 @@ module.exports.login_post = async (req, res) => {
             type: user.type
         })
         ARtoken.save();
-        res.cookie('uauthjwt', accessToken, {httpOnly: true});
         res.status(200).json({user: user._id, type: user.type, token: accessToken});
       }
       else{
@@ -158,7 +157,6 @@ module.exports.login_post = async (req, res) => {
                 type: trav.type
             })
             ARtoken.save();
-            res.cookie('tauthjwt', accessToken, {httpOnly: true});
             res.status(200).json({user: trav._id, type: trav.type, token: accessToken});
           }
       }
