@@ -2,6 +2,7 @@ const Product = require('../models/Product');
 const Order = require('../models/Order');
 const User = require('../models/User');
 const Traveler = require('../models/Traveler');
+const Feedback = require('../models/Feedback');
 const jwt = require('jsonwebtoken');
 const cheerio = require('cheerio');
 const request = require('request-promise')
@@ -412,4 +413,23 @@ module.exports.markarrived = async(req, res) => {
     }
 }
 
-
+module.exports.giveFeedback_post = async(req, res) => {
+    const orderId = req.params.orderid;
+    const order = await Order.findById(orderId);
+    const { rating, arrived_on_time, as_described, good_service, message } = req.body;
+    if (order){
+        try{
+            const feedback = await Feedback.create({order: orderId, rating, arrived_on_time, as_described, good_service, message});
+            order.feedback = feedback._id;
+            await order.save();
+            res.status(201).json({message: 'Feedback added successfully'});
+        }
+        catch(err){
+            console.log(err);
+            res.status(500).json({message: 'Server Error Occured'});
+        }
+    }
+    else{
+        res.status(404).json({message: 'Order not Found.'})
+    }
+}
