@@ -96,14 +96,17 @@ module.exports.uploadTicket_post = async (req, res) => {
                         subject: 'ToU: Ticket Received',
                         text: 'Dear ' + trav.name + ' ' + trav.lastname + ',\n\n' + 'You are now active and accepting orders!!\nPlease check that the below information is correct:' + '\ndeparture: ' + ticket.departure + '\nreturn: ' + ticket.return + '\ndeparture flight: ' + ticket.departure_flight + '\nreturn flight: ' + ticket.return_flight + '\nname: ' + ticket.ticket_name + '\n\nN.B: You have a legal obligation to inform us of any incorrect information in the above and any changes to your travel plans. Failure to do so may result in your account being suspended.\n\nBest regards,\nThe ToU Team'
                     };
-                    transporter.sendMail(mailOptions, (error, info) => {
-                        if (error) {
-                        console.log(error);
-                        } 
-                        else {
-                        console.log('Email sent: ' + info.response);
-                        console.log(link);
-                        }  
+                    await new Promise((resolve, reject) => {
+                        transporter.sendMail(mailOptions, (error, info) => {
+                            if (error) {
+                                console.log(error);
+                                reject(error);
+                            } else {
+                                console.log('Email sent: ' + info.response);
+                                console.log(link);
+                                resolve();
+                            }
+                        });
                     });
                 });
             });

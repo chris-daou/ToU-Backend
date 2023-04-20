@@ -17,21 +17,25 @@ let transporter = nodemailer.createTransport({
     }
 });
 
-const sendCompletiontoTraveler = (email, name, lastname, pname) => {
+const sendCompletiontoTraveler = async (email, name, lastname, pname) => {
     let mailOptions = {
         from: 'donotreply.tou.lebanon@outlook.com', // your email address
         to: email, // recipient's email address
         subject: 'ToU: Order Completed!',
         text: 'Dear ' + name + ' ' + lastname + ',\n\n' + 'This email has been sent to let you know that you successfully delivered:\n'+ pname +'\nhas been acquired by the client!. \n' + 'Best regards,\n'
         };
-      transporter.sendMail(mailOptions, (error, info) => {
-        if (error) {
-          console.log(error);
-        } else {
-          console.log('Email sent: ' + info.response);
-          console.log(link);
-        }
-    });
+        await new Promise((resolve, reject) => {
+            transporter.sendMail(mailOptions, (error, info) => {
+                if (error) {
+                    console.log(error);
+                    reject(error);
+                } else {
+                    console.log('Email sent: ' + info.response);
+                    console.log(link);
+                    resolve();
+                }
+            });
+        });
 }
 
 module.exports.confirm_order_get = async (req, res) => {

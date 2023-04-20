@@ -64,20 +64,24 @@ const createEmailLink = (id) => {
     return link;
 }
 
-const sendEmail = (email, name, lastname, link) => {
+const sendEmail = async (email, name, lastname, link) => {
     let mailOptions = {
         from: 'donotreply.tou.lebanon@outlook.com', // your email address
         to: email, // recipient's email address
         subject: 'ToU: Email Confirmation',
         text: 'Dear ' + name + ' ' + lastname + ',\n\n' + 'Please click on the link to confirm your email.\n\n' + 'Best regards,\n' + link
         };
-      transporter.sendMail(mailOptions, (error, info) => {
-        if (error) {
-          console.log(error);
-        } else {
-          console.log('Email sent: ' + info.response);
-          console.log(link);
-        }
+        await new Promise((resolve, reject) => {
+          transporter.sendMail(mailOptions, (error, info) => {
+              if (error) {
+                  console.log(error);
+                  reject(error);
+              } else {
+                  console.log('Email sent: ' + info.response);
+                  console.log(link);
+                  resolve();
+              }
+          });
       });
 }
 

@@ -33,21 +33,25 @@ let transporter = nodemailer.createTransport({
 
 
 
-  const sendAssignedEmailClient = (email, name, lastname, pname, d1, d2) => {
+  const sendAssignedEmailClient = async (email, name, lastname, pname, d1, d2) => {
     let mailOptions = {
         from: 'donotreply.tou.lebanon@outlook.com', // your email address
         to: email, // recipient's email address
         subject: 'ToU: Order Assigned!',
         text: 'Dear ' + name + ' ' + lastname + ',\n\n' + 'This email has been sent to let you know that your order:\n'+ pname+'\nHas been assigned to a traveler and will soon be on its way ToU!\nIt should arrive between '+ d1 + ' and '+d2 +'\n\nBest regards,\n'
         };
-      transporter.sendMail(mailOptions, (error, info) => {
-        if (error) {
-          console.log(error);
-        } else {
-          console.log('Email sent: ' + info.response);
-          console.log(link);
-        }
-      });
+        await new Promise((resolve, reject) => {
+            transporter.sendMail(mailOptions, (error, info) => {
+                if (error) {
+                    console.log(error);
+                    reject(error);
+                } else {
+                    console.log('Email sent: ' + info.response);
+                    console.log(link);
+                    resolve();
+                }
+            });
+        });
 }
 
 module.exports.accept_order_GET = async (req, res) => {
@@ -313,21 +317,25 @@ module.exports.uploadProof_post = async (req, res) => {
 
 
 
-  const sendOnTheWayEmail = (email, name, lastname, pname) => {
+  const sendOnTheWayEmail = async (email, name, lastname, pname) => {
     let mailOptions = {
         from: 'donotreply.tou.lebanon@outlook.com', // your email address
         to: email, // recipient's email address
         subject: 'ToU: Your Order is on its way!',
         text: 'Dear ' + name + ' ' + lastname + ',\n\n' + 'This email has been sent to let you know that your order:\n'+ pname+'\nIs being shipped and will be soon delivered ToU!\n\nBest regards,\n'
         };
-      transporter.sendMail(mailOptions, (error, info) => {
-        if (error) {
-          console.log(error);
-        } else {
-          console.log('Email sent: ' + info.response);
-          console.log(link);
-        }
-      });
+        await new Promise((resolve, reject) => {
+            transporter.sendMail(mailOptions, (error, info) => {
+                if (error) {
+                    console.log(error);
+                    reject(error);
+                } else {
+                    console.log('Email sent: ' + info.response);
+                    console.log(link);
+                    resolve();
+                }
+            });
+        });
 }
 
 
@@ -356,22 +364,26 @@ module.exports.markshipped = async(req, res) => {
     }
 }
 
-const sendArrivedEmail = (email, name, lastname, pname) => {
+const sendArrivedEmail = async (email, name, lastname, pname) => {
     let mailOptions = {
         from: 'donotreply.tou.lebanon@outlook.com', // your email address
         to: email, // recipient's email address
         subject: 'ToU: Your Order is in Lebanon!',
         text: 'Dear ' + name + ' ' + lastname + ',\n\n' + 'This email has been sent to let you know that your order:\n'+ pname+'\nLanded in Lebanon and will soon be on its way ToU!\n\nBest regards,\n'
         };
-      transporter.sendMail(mailOptions, (error, info) => {
-        if (error) {
-          console.log(error);
-        } else {
-          console.log('Email sent: ' + info.response);
-          console.log(link);
-        }
-      });
-}
+        await new Promise((resolve, reject) => {
+            transporter.sendMail(mailOptions, (error, info) => {
+                if (error) {
+                    console.log(error);
+                    reject(error);
+                } else {
+                    console.log('Email sent: ' + info.response);
+                    console.log(link);
+                    resolve();
+                }
+            });
+        });
+    }
 
 
 
