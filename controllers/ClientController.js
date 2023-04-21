@@ -6,6 +6,8 @@ const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 require('dotenv').config();
 const bcrypt = require('bcrypt');
+const cheerio = require('cheerio');
+const request = require('request');
 
 let transporter = nodemailer.createTransport({
     host: 'smtp-mail.outlook.com',
@@ -197,4 +199,26 @@ module.exports.changePass_post = async (req, res) => {
             res.status(500).json({message: 'Server Occured'});
     }
 }
+}
+
+module.exports.getRate_get = async (req, res) => {
+    try{
+    const options = {
+        url: "https://lirarate.org/",
+        gzip: true,
+      };
+      request(options, function(err, res, html){
+        let $ = cheerio.load(html);
+        
+        const buyrate = $("p[id='latest-buy']").text().trim();
+        const rate = buyrate.replace(/\D/g, '').substring(1);
+        
+        console.log(rate);
+        res.send({rate});
+        });
+    }
+    catch(err){
+        console.log(err);
+        res.status(400).send({ error: 'Error Occured' });
+    }
 }

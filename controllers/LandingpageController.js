@@ -1,25 +1,15 @@
-const cheerio = require('cheerio');
-const request = require('request');
+const Feedback = require('../models/Feedback');
 
-
-module.exports.getRate_get = async (req, res) => {
-    try{
-    const options = {
-        url: "https://lirarate.org/",
-        gzip: true,
-      };
-      request(options, function(err, res, html){
-        let $ = cheerio.load(html);
-        
-        const buyrate = $("p[id='latest-buy']").text().trim();
-        const rate = buyrate.replace(/\D/g, '').substring(1);
-        
-        console.log(rate);
-        res.send({rate});
-        });
-    }
-    catch(err){
-        console.log(err);
-        res.status(400).send({ error: 'Error Occured' });
+module.exports.testimonials_get = async (req, res) => {
+    try {
+        const testimonials = await Feedback.find({ testimonial: true });
+        if (testimonials){
+            res.status(200).json({ testimonials });
+        }
+        else{
+            res.status(404).json({ message: 'No testimonials found' });
+        }
+    } catch (err) {
+        res.status(500).json({ message: err.message });
     }
 }
