@@ -6,7 +6,7 @@ const jwt = require('jsonwebtoken');
 const { requireAuth, checkUser } = require('../middleware/Middleware');
 const nodemailer = require('nodemailer');
 require('dotenv').config();
-
+const Feedback = require('../models/Feedback');
 
 let transporter = nodemailer.createTransport({
     host: 'smtp-mail.outlook.com',
@@ -525,4 +525,20 @@ module.exports.unrevoke_post = async(req, res) => {
     }
 }
 
-
+module.exports.setTestimonial_post = async(req, res) => {
+    try{
+        const orderid = req.params.orderid;
+        const order = await Order.findById(orderid);
+        const feedback = order.feedback;
+        if(feedback){
+            feedback.testimonial = true;
+            await feedback.save();
+            res.status(200).json({message: 'Testimonial has been successfully set.'});
+        }else{
+            res.status(404).json({message: 'Feedback not found.'});
+        }
+    }catch(err){
+        console.log(err);
+        res.status(500).json({message: 'Server Error occured'});
+    }
+}

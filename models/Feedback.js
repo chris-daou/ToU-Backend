@@ -20,6 +20,9 @@ const feedbackSchema = new mongoose.Schema({
     },
     good_service: {
         type: Boolean,
+    },
+    testimonial:{
+        type: Boolean
     }
 })
 
