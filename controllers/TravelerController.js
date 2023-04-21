@@ -2,6 +2,7 @@ const Product = require('../models/Product');
 const Order = require('../models/Order');
 const User = require('../models/User');
 const Traveler = require('../models/Traveler');
+const Feedback = require('../models/Feedback');
 const jwt = require('jsonwebtoken');
 const cheerio = require('cheerio');
 const request = require('request-promise')
@@ -33,21 +34,25 @@ let transporter = nodemailer.createTransport({
 
 
 
-  const sendAssignedEmailClient = (email, name, lastname, pname, d1, d2) => {
+  const sendAssignedEmailClient = async (email, name, lastname, pname, d1, d2) => {
     let mailOptions = {
         from: 'donotreply.tou.lebanon@outlook.com', // your email address
         to: email, // recipient's email address
         subject: 'ToU: Order Assigned!',
         text: 'Dear ' + name + ' ' + lastname + ',\n\n' + 'This email has been sent to let you know that your order:\n'+ pname+'\nHas been assigned to a traveler and will soon be on its way ToU!\nIt should arrive between '+ d1 + ' and '+d2 +'\n\nBest regards,\n'
         };
-      transporter.sendMail(mailOptions, (error, info) => {
-        if (error) {
-          console.log(error);
-        } else {
-          console.log('Email sent: ' + info.response);
-          console.log(link);
-        }
-      });
+        await new Promise((resolve, reject) => {
+            transporter.sendMail(mailOptions, (error, info) => {
+                if (error) {
+                    console.log(error);
+                    reject(error);
+                } else {
+                    console.log('Email sent: ' + info.response);
+                    console.log(link);
+                    resolve();
+                }
+            });
+        });
 }
 
 module.exports.accept_order_GET = async (req, res) => {
@@ -313,21 +318,25 @@ module.exports.uploadProof_post = async (req, res) => {
 
 
 
-  const sendOnTheWayEmail = (email, name, lastname, pname) => {
+  const sendOnTheWayEmail = async (email, name, lastname, pname) => {
     let mailOptions = {
         from: 'donotreply.tou.lebanon@outlook.com', // your email address
         to: email, // recipient's email address
         subject: 'ToU: Your Order is on its way!',
         text: 'Dear ' + name + ' ' + lastname + ',\n\n' + 'This email has been sent to let you know that your order:\n'+ pname+'\nIs being shipped and will be soon delivered ToU!\n\nBest regards,\n'
         };
-      transporter.sendMail(mailOptions, (error, info) => {
-        if (error) {
-          console.log(error);
-        } else {
-          console.log('Email sent: ' + info.response);
-          console.log(link);
-        }
-      });
+        await new Promise((resolve, reject) => {
+            transporter.sendMail(mailOptions, (error, info) => {
+                if (error) {
+                    console.log(error);
+                    reject(error);
+                } else {
+                    console.log('Email sent: ' + info.response);
+                    console.log(link);
+                    resolve();
+                }
+            });
+        });
 }
 
 
@@ -356,22 +365,26 @@ module.exports.markshipped = async(req, res) => {
     }
 }
 
-const sendArrivedEmail = (email, name, lastname, pname) => {
+const sendArrivedEmail = async (email, name, lastname, pname) => {
     let mailOptions = {
         from: 'donotreply.tou.lebanon@outlook.com', // your email address
         to: email, // recipient's email address
         subject: 'ToU: Your Order is in Lebanon!',
         text: 'Dear ' + name + ' ' + lastname + ',\n\n' + 'This email has been sent to let you know that your order:\n'+ pname+'\nLanded in Lebanon and will soon be on its way ToU!\n\nBest regards,\n'
         };
-      transporter.sendMail(mailOptions, (error, info) => {
-        if (error) {
-          console.log(error);
-        } else {
-          console.log('Email sent: ' + info.response);
-          console.log(link);
-        }
-      });
-}
+        await new Promise((resolve, reject) => {
+            transporter.sendMail(mailOptions, (error, info) => {
+                if (error) {
+                    console.log(error);
+                    reject(error);
+                } else {
+                    console.log('Email sent: ' + info.response);
+                    console.log(link);
+                    resolve();
+                }
+            });
+        });
+    }
 
 
 
@@ -400,4 +413,23 @@ module.exports.markarrived = async(req, res) => {
     }
 }
 
-
+module.exports.giveFeedback_post = async(req, res) => {
+    const orderId = req.params.orderid;
+    const order = await Order.findById(orderId);
+    const { rating, arrived_on_time, as_described, good_service, message } = req.body;
+    if (order){
+        try{
+            const feedback = await Feedback.create({order: orderId, rating, arrived_on_time, as_described, good_service, message});
+            order.feedback = feedback._id;
+            await order.save();
+            res.status(201).json({message: 'Feedback added successfully'});
+        }
+        catch(err){
+            console.log(err);
+            res.status(500).json({message: 'Server Error Occured'});
+        }
+    }
+    else{
+        res.status(404).json({message: 'Order not Found.'})
+    }
+}

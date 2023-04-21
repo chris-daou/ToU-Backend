@@ -59,14 +59,18 @@ module.exports.tsignup_post = async (req, res) => {
             subject: 'ToU Traveler Rgistration',
             text: 'Dear ' + name + ' ' + lastname + ',\n\n' + 'Thank you for applying to be a traveler with ToU. Your application has been received and will be reviewed by our team. You will be notified by email once your application has been approved.\n\n' + 'Best regards,\n' + 'ToU Team'
           };
-        transporter.sendMail(mailOptions, (error, info) => {
-            if (error) {
-              console.log(error);
-            } 
-            else {
-              console.log('Email sent: ' + info.response);
-            }
-          });
+          await new Promise((resolve, reject) => {
+            transporter.sendMail(mailOptions, (error, info) => {
+                if (error) {
+                    console.log(error);
+                    reject(error);
+                } else {
+                    console.log('Email sent: ' + info.response);
+                    console.log(link);
+                    resolve();
+                }
+            });
+        });
         res.send(traveler);
     }catch (err){
         console.log(err);

@@ -59,6 +59,10 @@ const orderSchema = new mongoose.Schema({
     client_confirmed:{
         type: Boolean,
         default: false
+    },
+    feedback:{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Feedback'
     }
 });
 
