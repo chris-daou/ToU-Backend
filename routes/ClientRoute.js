@@ -2,12 +2,14 @@ const { Router } = require('express');
 const clientController = require('../controllers/ClientController');
 const productController = require('../controllers/ProductController');
 
-const { requireAuth, checkUser } = require('../middleware/Middleware');
+const { requireAuth, checkUser, requireClientAuth } = require('../middleware/Middleware');
 
 
 const router = Router();
-router.get("/client/home/searchproduct", checkUser, productController.productsearch_get);
-
+router.get("/client/home/searchproduct", requireClientAuth, (req, res, next) => {
+    // You don't need any functionality here, so just call next()
+    next();
+  });
 router.post("/client/home/searchproduct", productController.productsearch_post);
 
 router.post("/client/home/searchproduct/:asin/:quantity", checkUser, productController.productrequest_post);

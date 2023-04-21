@@ -126,6 +126,9 @@ module.exports.login_post = async (req, res) => {
       
       const user = await User.login(email, password);
       console.log(user);
+      if(user && !user.valid_e){
+        return res.status(406).json({message: 'The email is not yet confirmed'})
+      }
       if(user){
         const accessToken = createAccessToken(user._id, user.type);
         const refreshToken = createRefreshToken(user._id, user.type);

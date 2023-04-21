@@ -140,7 +140,7 @@ const requireTravelerAuth = async (req, res, next) => {
 
 
 const requireClientAuth = async (req, res, next) => {
-    const token = req.cookies.uauthjwt;
+    const token = req.headers.authorization.split(' ')[1];
   
     if (!token) {
       return res.status(401).json({ message: 'Unauthorized' });
@@ -180,7 +180,7 @@ const requireClientAuth = async (req, res, next) => {
               );
         
               // Set the new access token in the response cookie
-              res.cookie('uauthjwt', newAccessToken, { httpOnly: true });
+              res.status(400).json({newAccessToken});
               next();
         }else{
             return res.status(401).json({ message: 'Unauthorized' });
