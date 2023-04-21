@@ -8,6 +8,7 @@ require('dotenv').config();
 const bcrypt = require('bcrypt');
 const cheerio = require('cheerio');
 const request = require('request');
+const Feedback = require('../models/Feedback');
 
 let transporter = nodemailer.createTransport({
     host: 'smtp-mail.outlook.com',
@@ -220,5 +221,26 @@ module.exports.getRate_get = async (req, res) => {
     catch(err){
         console.log(err);
         res.status(400).send({ error: 'Error Occured' });
+    }
+}
+
+module.exports.giveFeedback_post = async(req, res) => {
+    const orderId = req.params.orderid;
+    const order = await Order.findById(orderId);
+    const { rating, arrived_on_time, as_described, good_service, message } = req.body;
+    if (order){
+        try{
+            const feedback = await Feedback.create({order: orderId, rating, arrived_on_time, as_described, good_service, message});
+            order.feedback = feedback._id;
+            await order.save();
+            res.status(201).json({message: 'Feedback added successfully'});
+        }
+        catch(err){
+            console.log(err);
+            res.status(500).json({message: 'Server Error Occured'});
+        }
+    }
+    else{
+        res.status(404).json({message: 'Order not Found.'})
     }
 }

@@ -38,6 +38,8 @@ router.post('/client/home/profile/edit/changepassword',)
 router.post('/client/home/activeorder/:orderid/markascomplete', clientController.complete_order_post);
 //Client completes order
 
+router.post('client/home/activeorder/:orderid/markascomplete/feedback', clientController.giveFeedback_post);
+
 router.get('/getrate', clientController.getRate_get);
 
 module.exports = router;
