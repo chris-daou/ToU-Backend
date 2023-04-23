@@ -429,3 +429,20 @@ module.exports.activeOrders_get = async(req, res) => {
         res.status(500).send({message: 'Server Error Occured'});
     }
 }
+
+module.exports.pendingOrders_get = async(req, res) => {
+    try{
+        const trav = await Traveler.findById(req.traveler._id);
+        if(trav){
+            const porders = trav.new_orders;
+            res.status(200).send({porders: porders});
+        }
+        else{
+            res.status(404).send({message: 'Traveler not Found'});
+        }
+    }
+    catch (err){
+        console.log(err);
+        res.status(500).send({message: 'Server Error Occured'});
+    }
+}
