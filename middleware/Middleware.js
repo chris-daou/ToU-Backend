@@ -26,35 +26,75 @@ const checkUser = (req, res, next) => {
             }
         })
     }else{
+      const authHeader = req.headers['authorization'];
+      const token1 = authHeader && authHeader.split(' ')[1];
+      if(token1){
+        jwt.verify(token1, process.env.SECRET_JWT, async (err, accessPayload) => {
+            if(err){
+                console.log(err);
+                res.locals.user = null;
+                req.user = null;
+                res.send('Please login before accessing this page.')
+            }else{
+                //use accessPayload to access payload
+                let user = await User.findById(accessPayload.id);
+                res.locals.user = user;//this way, user can be used in views and we can tackle its attributes
+                req.user = user;
+                next();
+            }
+        })
+      }else{
         res.locals.user = null;
         res.send('Please login before accessing this page.')
-        
+      }
     }
 }
 
 //check Traveler
 const checkTraveler = (req, res, next) => {
-    const token = req.cookies.tauthjwt;
-
-    if(token){
-        jwt.verify(token, process.env.SECRET_JWT, async (err, accessPayload) => {
-            if(err){
-                console.log(err);
-                res.locals.user = null;
-                req.user = null;
-                next();
-            }else{
-                //use accessPayload to access payload
-                let traveler = await Traveler.findById(accessPayload.id);
-                res.locals.traveler = traveler;//this way, user can be used in views and we can tackle its attributes
-                req.traveler = traveler;
-                next();
-            }
-        })
-    }else{
+  const token = req.cookies.tauthjwt;
+  if(token){
+    jwt.verify(token, process.env.SECRET_JWT, async (err, accessPayload) => {
+      if(err){
+        console.log(err);
         res.locals.user = null;
+        req.user = null;
         next();
+      }
+      else{
+        //use accessPayload to access payload
+        let traveler = await Traveler.findById(accessPayload.id);
+        res.locals.traveler = traveler;//this way, user can be used in views and we can tackle its attributes
+        req.traveler = traveler;
+        next();
+      }
+    })
+  }
+  else{
+    const authHeader = req.headers['authorization'];
+    const token1 = authHeader && authHeader.split(' ')[1];
+    if(token1){
+      jwt.verify(token1, process.env.SECRET_JWT, async (err, accessPayload) => {
+        if(err){
+          console.log(err);
+          res.locals.user = null;
+          req.user = null;
+          res.send('Please login before accessing this page.')
+        }
+        else{
+          //use accessPayload to access payload
+          let traveler = await Traveler.findById(accessPayload.id);
+          res.locals.traveler = traveler;//this way, user can be used in views and we can tackle its attributes
+          req.traveler = traveler;
+          next();
+        }
+      })
     }
+    else{  
+      res.locals.user = null;
+      next();
+    }
+  }
 }
 
 

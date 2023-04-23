@@ -67,6 +67,7 @@ module.exports.confirm_order_get = async (req, res) => {
 }
 
 module.exports.getPendingClient_get = async (req, res) => {
+    console.log(req)
     const clientId = req.user._id;
     const client = await User.findById(clientId);
 
@@ -208,14 +209,14 @@ module.exports.getRate_get = async (req, res) => {
         url: "https://lirarate.org/",
         gzip: true,
       };
-      request(options, function(err, res, html){
+      request(options, function(err, res1, html){
         let $ = cheerio.load(html);
         
         const buyrate = $("p[id='latest-buy']").text().trim();
         const rate = buyrate.replace(/\D/g, '').substring(1);
         
         console.log(rate);
-        res.send({rate});
+        res.send({rate: rate});
         });
     }
     catch(err){

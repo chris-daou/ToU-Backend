@@ -18,8 +18,6 @@ const app = express();
 app.use(express.static('public'));
 app.use(express.json());//takes any json obj that comes with a req and parses it for us so we can use it.
 app.use(cookieParser());
-// view engine
-app.set('view engine', 'ejs');
 
 // database connection
 mongoose.set('strictQuery', false);
@@ -28,7 +26,7 @@ mongoose.connect("mongodb+srv://vickenk8:lF4PbJg2PKGljdDM@cluster0.3zxbi6j.mongo
 
 
 app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', 'exp://192.168.16.101:19000/');
+  res.setHeader('Access-Control-Allow-Origin', 'exp://192.168.16.101:19001/');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   next();

@@ -22,6 +22,8 @@ router.post("/traveler/home/activeorders/:orderid/uploadproof", travController.u
 
 router.post('/traveler/home/activeorders/:orderid/markassent', travController.markshipped)
 
+router.get('/traveler/home/activeorders',checkTraveler, travController.activeOrders_get)
+
 
 
 // router.get('/traveler/:id/completed-orders')

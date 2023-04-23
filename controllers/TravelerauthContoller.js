@@ -49,14 +49,14 @@ module.exports.tsignup_post = async (req, res) => {
     try{
         const data = JSON.parse(req.body.otherData);
         const { name, lastname, gender, phone_number, nationality, email} = data;
-        const traveler = await Traveler.create({ name, lastname, gender, phone_number, nationality, email});
+        const traveler = await Traveler.create({ name, lastname, gender, phone_number, nationality, email, approved: false});
         traveler.cv = req.files['cv'][0].key;
         traveler.identification = req.files['id'][0].key;
         traveler.save();
         let mailOptions = {
             from: 'donotreply.tou.lebanon@outlook.com', // your email address
             to: email, // recipient's email address
-            subject: 'ToU Traveler Rgistration',
+            subject: 'ToU Traveler Registration',
             text: 'Dear ' + name + ' ' + lastname + ',\n\n' + 'Thank you for applying to be a traveler with ToU. Your application has been received and will be reviewed by our team. You will be notified by email once your application has been approved.\n\n' + 'Best regards,\n' + 'ToU Team'
           };
           await new Promise((resolve, reject) => {

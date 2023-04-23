@@ -17,10 +17,10 @@ router.post("/client/home/searchproduct/:asin/:quantity", checkUser, productCont
 router.get('/confirmorder/:token/:orderid', clientController.confirm_order_get);
 //Client confirms their order
 
-router.get('/client/home/pendingorders',clientController.getPendingClient_get);
+router.get('/client/home/pendingorders',checkUser, clientController.getPendingClient_get);
 //Client gets list of pending orders
 
-router.get('/client/home/activeorders', clientController.getActiveClient_get);
+router.get('/client/home/activeorders',checkUser, clientController.getActiveClient_get);
 //Client gets list of active orders
 
 router.get('/client/home/activeorders/:orderid', clientController.getActiveOrder_get)
@@ -40,6 +40,6 @@ router.post('/client/home/activeorder/:orderid/markascomplete', clientController
 
 router.post('client/home/activeorder/:orderid/markascomplete/feedback', clientController.giveFeedback_post);
 
-router.get('/getrate', clientController.getRate_get);
+router.post('/getrate', clientController.getRate_get);
 
 module.exports = router;
