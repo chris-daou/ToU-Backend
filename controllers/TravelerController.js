@@ -446,3 +446,15 @@ module.exports.pendingOrders_get = async(req, res) => {
         res.status(500).send({message: 'Server Error Occured'});
     }
 }
+
+module.exports.splashScreen_get = async(req, res) => {
+    try{
+        console.log(req.stat)
+        const stat = req.stat;
+        res.status(200).send({status: stat});
+    }
+    catch(err){
+        console.log(err);
+        res.status(500).send({message: 'Server Error Occured'});
+    }
+}
