@@ -2,6 +2,7 @@ const { Router } = require('express');
 
 const travController = require('../controllers/TravelerController');
 const { checkTraveler, requireTravelerAuth } = require('../middleware/Middleware');
+const middleware = require('../middleware/Middleware');
 
 const router = Router();
 
@@ -24,6 +25,7 @@ router.post('/traveler/home/activeorders/:orderid/markassent', travController.ma
 
 router.get('/traveler/home/activeorders',checkTraveler, travController.activeOrders_get)
 router.get('/traveler/home/pendingorders',checkTraveler, travController.pendingOrders_get);
+router.get('/checktokenmobile', middleware.checkTocken_mb);
 
 
 
