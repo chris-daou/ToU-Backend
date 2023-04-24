@@ -236,6 +236,47 @@ const requireClientAuth = async (req, res, next) => {
       return res.status(401).json({ message: 'Unauthorized' });
     }
   };
+
+module.exports.checkTocken_mb = async (req, res) => {
+  try{
+      const authHeader = req.headers['authorization'];
+      const token = authHeader && authHeader.split(' ')[1];
+      if(token){
+        jwt.verify(token, process.env.SECRET_JWT, async (err, accessPayload) => {
+          if(err){
+            res.status(692);
+            return;
+          }
+          else{
+            const traveler = await Traveler.findById(accessPayload.id);
+            if(traveler){
+              res.status(690);
+              return;
+            }
+            else{
+              const client = await User.findById(accessPayload.id);
+              if (client) {
+                res.status(691);
+                return;
+              }
+              else{
+                res.status(692);
+                return;
+              }
+            }
+          }
+        })
+      }
+      else{  
+        res.status(692);
+        return;
+      }
+    }
+  catch(err){
+    console.log(err);
+    res.status(500).json({message: 'Server Error Occured.'})
+  }}
+  
 module.exports = {requireTravelerAuth, checkUser, checkTraveler, checkRPtoken, requireClientAuth};
 
 
