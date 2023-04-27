@@ -104,16 +104,13 @@ module.exports.singup_post = async (req, res) => {
   const { email, password, name, lastname, nationality, gender, city, phone_number } = req.body;
   const found = await Traveler.findOne({email});
   if(found){
-      res.status(400).json(found.type);
-      return;
+      return res.status(418).json(found.type);
   }
-  console.log('hi');
   
 
   try{
       const user = await User.create({email, password, name, lastname, nationality, gender, phone_number, city, type: "User"});
-      const token = createToken(user._id);
-      res.cookie('uauthjwt', token, {httpOnly: true, maxAge: maxAge*1000});
+      
       const emailLink = createEmailLink(user._id);
       sendEmail(email, name, lastname, emailLink);
       res.status(201).json({user: user._id});//Send response with 201 status then send back user as json
