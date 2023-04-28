@@ -96,6 +96,13 @@ module.exports.getActiveClient_get = async (req, res) => {
     if(client){
         try{
             const list = client.active_orders;
+            const list1 = []
+            for(let i = 0; i < list.length; i++){
+                const order = await Order.findById(list[i])
+                const product = await Product.findById(order.item)
+                const obj = {order, product}
+                list1.push(obj)
+            }
             res.status(200).json( {aorders: list});
         }catch(err){
             console.log(err);
