@@ -71,6 +71,10 @@ const userSchema = new mongoose.Schema({
 //fire a function before doc saved to db
 userSchema.pre('save', async function(next) {//didnt use arrow function so that we could use this
     //console.log('user about to be created and saved', this);  //refers to the that we are trying to create 'await User.create...' before it is saved in db, note that it wont take __V cz not saved yet
+    if (!this.isNew) {
+      return next();
+    }
+    
     const salt = await bcrypt.genSalt();
     this.password = await bcrypt.hash(this.password, salt);
     next();

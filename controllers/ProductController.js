@@ -263,6 +263,8 @@ module.exports.productsearch_post = (req, res) => {
 }
 
 module.exports.productrequest_post = async (req, res) => {
+  
+  const newNAT = req.nat;
   const data = req.body.data;
   const quantity = req.params.quantity;
   const product = await Product.findOne({asin: data.asin});
@@ -272,7 +274,7 @@ module.exports.productrequest_post = async (req, res) => {
       const copyorder = await Order.findOne({item: productId});
       if(copyorder.cost){//checking if already existing product has a cost set to it.
         const order = new Order({
-          client: req.user._id,
+          client: req.userId,
           item: product._id,
           quantity: quantity,
           cost: ((copyorder.cost) / copyorder.quantity) * parseInt(quantity),
@@ -280,33 +282,33 @@ module.exports.productrequest_post = async (req, res) => {
           t_commission: ((copyorder.t_commission) / copyorder.quantity) * parseInt(quantity),
          })//Order will be created and cost will be set according to quantity.
           await order.save();
-          const client = await User.findById(req.user._id);
+          const client = await User.findById(req.userId);
           client.pending_orders.push(order._id);
           await client.save();
           product.quantity_ordered = product.quantity_ordered + parseInt(quantity);
           await product.save();
-          res.status(200).json({message: 'Successfully Created Order with already existing product and its cost.'});
-          return;
+          return res.status(200).json({message: 'Successfully Created Order with already existing product and its cost.', accessToken: newNAT});
+          
       }else{//If product copy does not have an existing cost this block will be triggered
         const order = new Order({
-          client: req.user._id,
+          client: req.userId,
           item: product._id,
           quantity: quantity
          })//Order will be created without copying non-existing cost
           await order.save();
-          const client = await User.findById(req.user._id);
+          const client = await User.findById(req.userId);
           client.pending_orders.push(order._id);
           await client.save();
           product.quantity_ordered = product.quantity_ordered + parseInt(quantity);
           await product.save();
-          res.status(200).json({message: 'Successfully Created Order with already existing product.'});
-          return;
+          return res.status(200).json({message: 'Successfully Created Order with already existing product.', accessToken: newNAT});
+          
       }
     }
     else{//Product does not exist in the database
       if(data.price == undefined || data.price == null || data.price == ""){//If Product has no price
-        res.status(406).json( {message: 'Product is Out of stock'});      //Then it means that product is out of stock
-        return;
+        return res.status(406).json( {message: 'Product is Out of stock'});      //Then it means that product is out of stock
+        
       }
       const newProduct = new Product({
         title: data.title,
@@ -330,7 +332,7 @@ module.exports.productrequest_post = async (req, res) => {
         const a_commission = t_commission / 2;
         const cost = Price + a_commission + t_commission;
         const order = new Order({
-          client: req.user._id,
+          client: req.userId,
           item: newProduct._id,
           quantity: quantity,
           cost: cost*quantity,
@@ -338,26 +340,27 @@ module.exports.productrequest_post = async (req, res) => {
           a_commission: a_commission*quantity
         })
         await order.save();
-        const client = await User.findById(req.user._id);
+        const client = await User.findById(req.userId);
         client.pending_orders.push(order._id);
         await client.save();
-        res.status(200).json({message: 'Successfully Created Order with new Product WITH cost.'});
-        return;
+        return res.status(200).json({message: 'Successfully Created Order with new Product WITH cost.', accessToken: newNAT});
+        
       }
       else{
         console.log("This was triggered!")
         const order = new Order({
-          client: req.user._id,
+          client: req.userId,
           item: newProduct._id,
           quantity: quantity
           
         })
         
         await order.save();
-        const client = await User.findById(req.user._id);
+        const client = await User.findById(req.userId);
         client.pending_orders.push(order._id);
         await client.save();
-        res.status(200).send("Successfully created Order.")
+        return res.status(200).send({message: "Successfully created Order.", accessToken: newNAT})
+        
       }
       
     }

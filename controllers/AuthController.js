@@ -87,7 +87,7 @@ const sendEmail = async (email, name, lastname, link) => {
 
 
 const createAccessToken = (id, userType) => {
-    const expiresIn = '1h'; // Access token expires in 1 hour
+    const expiresIn = '2m'; // Access token expires in 1 hour
     const secret = process.env.SECRET_JWT;
     const token = jwt.sign({ id, userType }, secret, { expiresIn });
     return token;

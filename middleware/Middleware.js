@@ -159,9 +159,10 @@ const requireTravelerAuth = async (req, res, next) => {
                 { refreshToken: ARtoken.refreshToken },
                 { accessToken: newAccessToken }
               );
-        
+              req.userId = accessPayload.id;
+              req.userType = accessPayload.type;
+              req.nat = newAccessToken;
               // Set the new access token in the response cookie
-              res.cookie('tauthjwt', newAccessToken, { httpOnly: true });
               next();
         }else{
             return res.status(401).json({ message: 'Unauthorized' });
@@ -181,49 +182,63 @@ const requireTravelerAuth = async (req, res, next) => {
 
 const requireClientAuth = async (req, res, next) => {
     const token = req.headers.authorization.split(' ')[1];
-  
+    const currentTime = Math.floor(Date.now() / 1000);
+    console.log('Curent time '+ currentTime)
     if (!token) {
-      return res.status(401).json({ message: 'Unauthorized' });
+      console.log("0");
+      return res.status(401).json({ message: 'Unauthorized 0' });
     }
   
     try {
-      const accessPayload = jwt.verify(token, process.env.SECRET_JWT);
-  
+      console.log("here")
+      // const decoded = jwt.decode(token);
+      // if(decoded.exp<currentTime){
+      //   return res.status(401).json({ message: 'Unauthorized 6'});
+      // }
+      const accessPayload = jwt.decode(token);
+      console.log("still here")
       if (!accessPayload) {
-        return res.status(401).json({ message: 'Unauthorized' });
+        console.log("1")
+        return res.status(401).json({ message: 'Unauthorized 1' });
       }
   
       // Check if the token has expired
-      const currentTime = Math.floor(Date.now() / 1000);
+      
       if (accessPayload.exp < currentTime) {
         // Get the refresh token from the database
         const ARtoken = await Token.findOne({ accessToken: token });
   
         if (!ARtoken) {
-          return res.status(401).json({ message: 'Unauthorized' });
+          console.log("2")
+          return res.status(401).json({ message: 'Unauthorized 2 because there is no AR in db' });
         }
   
         // Verify the refresh token and get its payload
-        const decodedRefreshToken = jwt.verify(ARtoken.refreshToken, process.env.SECRET_REFRESH_JWT);
-        
-
+        let decodedRefreshToken = jwt.decode(ARtoken.refreshToken);
+        console.log('HI');
         // Generate a new access token and save it in the database
-        if(decodedRefreshToken && decodedRefreshToken.exp < currentTime){
+        if(decodedRefreshToken && decodedRefreshToken.exp > currentTime){
+          console.log("we Here")
+          decodedRefreshToken = jwt.verify(ARtoken.refreshToken, process.env.SECRET_REFRESH_JWT);
             const newAccessToken = jwt.sign(
                 { id: decodedRefreshToken.user, type: decodedRefreshToken.type },
                 process.env.SECRET_JWT,
-                { expiresIn: '1h' }
+                { expiresIn: '2m' }
               );
-              await Token.updateOne(
-                { refreshToken: ARtoken.refreshToken },
-                { accessToken: newAccessToken }
-              );
-        
+              // await Token.updateOne(
+              //   { refreshToken: ARtoken.refreshToken },
+              //   { accessToken: newAccessToken }
+              // );
+              req.userId = accessPayload.id;
+              req.userType = accessPayload.type;
+              req.nat  = newAccessToken;
+              console.log("renewed the at");
               // Set the new access token in the response cookie
-              res.status(400).json({newAccessToken});
               next();
+              return;
         }else{
-            return res.status(401).json({ message: 'Unauthorized' });
+            console.log("3")
+            return res.status(401).json({ message: 'Unauthorized 3' });
         }
       }
   
@@ -231,9 +246,11 @@ const requireClientAuth = async (req, res, next) => {
       req.userId = accessPayload.id;
       req.userType = accessPayload.type;
       next();
+      return;
     } catch (err) {
+      console.log("5")
       console.log(err);
-      return res.status(401).json({ message: 'Unauthorized' });
+      return res.status(401).json({ message: 'Unauthorized 5' });
     }
   };
 
