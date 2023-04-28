@@ -49,16 +49,16 @@ module.exports.tsignup_post = async (req, res) => {
         }
     try{
         const data = JSON.parse(req.body.otherData);
-        const user = User.findOne({email: data.email});
-        const trav = Traveler.findOne({email: data.email})
+        const user = await User.findOne({email: data.email});
+        const trav = await Traveler.findOne({email: data.email})
         if(user || trav){
-            return res.status(400).send({error: 'Email already exists'});
+            return res.status(406).send({error: 'Email already exists'});
         }
         const { name, lastname, gender, phone_number, nationality, email} = data;
         const traveler = await Traveler.create({ name, lastname, gender, phone_number, nationality, email, approved: false});
         traveler.cv = req.files['cv'][0].key;
         traveler.identification = req.files['id'][0].key;
-        traveler.save();
+        await traveler.save();
         let mailOptions = {
             from: 'donotreply.tou.lebanon@outlook.com', // your email address
             to: email, // recipient's email address
