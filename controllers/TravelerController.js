@@ -414,19 +414,27 @@ module.exports.markarrived = async(req, res) => {
 }
 
 module.exports.activeOrders_get = async(req, res) => {
-    try{
-        const trav = await Traveler.findById(req.traveler._id);
-        if(trav){
-            const aorders = trav.assigned_orders;
+    const tid = req.traveler._id;
+    const trav = await Traveler.findById(tid);
+    if(trav){
+        try{
+            const list = trav.new_orders;
+            const list1 = [];
+            for(let i = 0; i < list.length; i++){
+                const order = await Order.findById(list[i]);
+                const product = await Product.findById(order.item);
+                const obj = {order,product};
+                list1.push(obj);
+            }
             res.status(200).send({aorders: aorders});
         }
-        else{
-            res.status(404).send({message: 'Traveler not Found'});
+        catch (err){
+            console.log(err);
+            res.status(500).send({message: 'Server Error Occured'});
         }
     }
-    catch (err){
-        console.log(err);
-        res.status(500).send({message: 'Server Error Occured'});
+    else{
+        res.status(404).send({message: 'Traveler not Found'});
     }
 }
 
