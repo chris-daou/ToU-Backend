@@ -2,6 +2,7 @@
 const Traveler = require('../models/Traveler');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
+const User = require('../models/User');
 // const bodyParser = require('body-parser');
 
 let transporter = nodemailer.createTransport({
@@ -48,6 +49,11 @@ module.exports.tsignup_post = async (req, res) => {
         }
     try{
         const data = JSON.parse(req.body.otherData);
+        const user = User.findOne({email: data.email});
+        const trav = Traveler.findOne({email: data.email})
+        if(user || trav){
+            return res.status(400).send({error: 'Email already exists'});
+        }
         const { name, lastname, gender, phone_number, nationality, email} = data;
         const traveler = await Traveler.create({ name, lastname, gender, phone_number, nationality, email, approved: false});
         traveler.cv = req.files['cv'][0].key;
