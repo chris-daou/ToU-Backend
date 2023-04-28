@@ -418,7 +418,7 @@ module.exports.activeOrders_get = async(req, res) => {
     const trav = await Traveler.findById(tid);
     if(trav){
         try{
-            const list = trav.new_orders;
+            const list = trav.assigned_orders;
             const list1 = [];
             for(let i = 0; i < list.length; i++){
                 const order = await Order.findById(list[i]);
@@ -426,7 +426,7 @@ module.exports.activeOrders_get = async(req, res) => {
                 const obj = {order,product};
                 list1.push(obj);
             }
-            res.status(200).send({aorders: aorders});
+            res.status(200).send({aorders: list1});
         }
         catch (err){
             console.log(err);
@@ -439,19 +439,27 @@ module.exports.activeOrders_get = async(req, res) => {
 }
 
 module.exports.pendingOrders_get = async(req, res) => {
-    try{
-        const trav = await Traveler.findById(req.traveler._id);
-        if(trav){
-            const porders = trav.new_orders;
-            res.status(200).send({porders: porders});
+    const tid = req.traveler._id;
+    const trav = await Traveler.findById(tid);
+    if(trav){
+        try{
+            const list = trav.new_orders;
+            const list1 = [];
+            for(let i = 0; i < list.length; i++){
+                const order = await Order.findById(list[i]);
+                const product = await Product.findById(order.item);
+                const obj = {order,product};
+                list1.push(obj);
+            }
+            res.status(200).send({porders: list1});
         }
-        else{
-            res.status(404).send({message: 'Traveler not Found'});
+        catch (err){
+            console.log(err);
+            res.status(500).send({message: 'Server Error Occured'});
         }
     }
-    catch (err){
-        console.log(err);
-        res.status(500).send({message: 'Server Error Occured'});
+    else{
+        res.status(404).send({message: 'Traveler not Found'});
     }
 }
 

@@ -22,7 +22,7 @@ router.post("/traveler/home/activeorders/:orderid/uploadproof", travController.u
 
 router.post('/traveler/home/activeorders/:orderid/markassent', travController.markshipped)
 
-router.get('/traveler/home/activeorders',requireTravelerA, travController.activeOrders_get)
+router.get('/traveler/home/activeorders',requireTravelerAuth, travController.activeOrders_get)
 router.get('/traveler/home/pendingorders',checkTraveler, travController.pendingOrders_get);
 router.get('/checktokenmobile', checkToken_mb, travController.splashScreen_get);
 
