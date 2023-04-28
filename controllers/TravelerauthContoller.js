@@ -48,7 +48,7 @@ module.exports.tsignup_post = async (req, res) => {
           return res.status(400).send({ error: err.message });
         }
     try{
-        const data = JSON.parse(req.body.otherData);
+        const data = await JSON.parse(req.body.otherData);
         const user = await User.findOne({email: data.email});
         const trav = await Traveler.findOne({email: data.email})
         if(user || trav){

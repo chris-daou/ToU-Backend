@@ -35,7 +35,7 @@ router.put('/client/home/profile/edit', checkUser, clientController.editProfile)
 router.post('/client/home/profile/edit/changepassword',)
 
 
-router.post('/client/home/activeorder/:orderid/markascomplete', clientController.complete_order_post);
+router.post('/client/home/activeorder/:orderid/markascomplete', checkUser, clientController.complete_order_post);
 //Client completes order
 
 router.post('client/home/activeorder/:orderid/markascomplete/feedback', clientController.giveFeedback_post);
