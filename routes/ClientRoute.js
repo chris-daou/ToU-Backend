@@ -12,7 +12,7 @@ router.get("/client/home/searchproduct", requireClientAuth, (req, res, next) => 
   });
 router.post("/client/home/searchproduct", productController.productsearch_post);
 
-router.post("/client/home/searchproduct/:asin/:quantity", checkUser, productController.productrequest_post);
+router.post("/client/home/searchproduct/:asin/:quantity", requireClientAuth, productController.productrequest_post);
 
 router.get('/confirmorder/:token/:orderid', clientController.confirm_order_get);
 //Client confirms their order
