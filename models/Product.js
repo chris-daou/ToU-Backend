@@ -35,6 +35,9 @@ const productSchema = new mongoose.Schema({
     },
     quantity_ordered:{
         type: Number
+    },
+    image:{
+        type: String
     }
 })
 

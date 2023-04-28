@@ -67,14 +67,20 @@ module.exports.confirm_order_get = async (req, res) => {
 }
 
 module.exports.getPendingClient_get = async (req, res) => {
-    console.log(req)
     const clientId = req.user._id;
     const client = await User.findById(clientId);
 
     if(client){
         try{
             const list = client.pending_orders;
-            res.status(200).json( {porders: list});
+            const list1 = []
+            for(let i = 0; i < list.length; i++){
+                const order = await Order.findById(list[i])
+                const product = await Product.findById(order.item)
+                const obj = {order, product}
+                list1.push(obj)
+            }
+            res.status(200).send( [{porders: list1}]);
         }catch(err){
             console.log(err);
         }

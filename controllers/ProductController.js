@@ -319,6 +319,7 @@ module.exports.productrequest_post = async (req, res) => {
         height: data.height,
         inStock: data.Instock,
         url: data.url,
+        image: data.imageSource,
         quantity_ordered : quantity
       })//Creating the new Product and saving it in the database
       await newProduct.save();
