@@ -71,10 +71,10 @@ module.exports.tsignup_post = async (req, res) => {
                 }
             });
         });
-        res.send(traveler);
+        res.status(200).send(traveler);
     }catch (err){
         console.log(err);
-        res.send({result : false});
+        res.status(400).send({result : false});
     }
     });
 };

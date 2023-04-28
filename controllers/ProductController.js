@@ -240,7 +240,9 @@ module.exports.productsearch_get = (req, res) => {
 
 module.exports.productsearch_post = (req, res) => {
     const productLink = req.body.link;
-    
+    if(!productLink){
+      return res.status(400).json({message: 'Invalid or Empty Link'})
+    }
     getData(productLink).then((data) => {
         const details = {
             title : data.title,
@@ -255,7 +257,7 @@ module.exports.productsearch_post = (req, res) => {
             Instock : data.Instock,
             url: productLink
         }
-        res.json(details);
+        return res.json(details);
     })
 
 }
@@ -277,12 +279,12 @@ module.exports.productrequest_post = async (req, res) => {
           a_commission : ((copyorder.a_commission) / copyorder.quantity) * parseInt(quantity),
           t_commission: ((copyorder.t_commission) / copyorder.quantity) * parseInt(quantity),
          })//Order will be created and cost will be set according to quantity.
-          order.save();
+          await order.save();
           const client = await User.findById(req.user._id);
           client.pending_orders.push(order._id);
-          client.save();
+          await client.save();
           product.quantity_ordered = product.quantity_ordered + parseInt(quantity);
-          product.save();
+          await product.save();
           res.status(200).json({message: 'Successfully Created Order with already existing product and its cost.'});
           return;
       }else{//If product copy does not have an existing cost this block will be triggered
@@ -291,12 +293,12 @@ module.exports.productrequest_post = async (req, res) => {
           item: product._id,
           quantity: quantity
          })//Order will be created without copying non-existing cost
-          order.save();
+          await order.save();
           const client = await User.findById(req.user._id);
           client.pending_orders.push(order._id);
-          client.save();
+          await client.save();
           product.quantity_ordered = product.quantity_ordered + parseInt(quantity);
-          product.save();
+          await product.save();
           res.status(200).json({message: 'Successfully Created Order with already existing product.'});
           return;
       }
@@ -319,7 +321,7 @@ module.exports.productrequest_post = async (req, res) => {
         url: data.url,
         quantity_ordered : quantity
       })//Creating the new Product and saving it in the database
-      newProduct.save();
+      await newProduct.save();
       if(newProduct.weight && newProduct.height && newProduct.width && newProduct.length && 
         newProduct.weight!==-1 && newProduct.height!==-1 && newProduct.width!==-1 && newProduct.length!==-1){
         const Price = parseInt((newProduct.price).replace(/[^\d.]/g, ''));
@@ -334,10 +336,10 @@ module.exports.productrequest_post = async (req, res) => {
           t_commission: t_commission*quantity,
           a_commission: a_commission*quantity
         })
-        order.save();
+        await order.save();
         const client = await User.findById(req.user._id);
         client.pending_orders.push(order._id);
-        client.save();
+        await client.save();
         res.status(200).json({message: 'Successfully Created Order with new Product WITH cost.'});
         return;
       }
@@ -350,10 +352,10 @@ module.exports.productrequest_post = async (req, res) => {
           
         })
         
-        order.save();
+        await order.save();
         const client = await User.findById(req.user._id);
         client.pending_orders.push(order._id);
-        client.save();
+        await client.save();
         res.status(200).send("Successfully created Order.")
       }
       
