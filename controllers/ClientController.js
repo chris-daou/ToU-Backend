@@ -67,9 +67,9 @@ module.exports.confirm_order_get = async (req, res) => {
 }
 
 module.exports.getPendingClient_get = async (req, res) => {
-    const clientId = req.user._id;
+    const clientId = req.userId;
     const client = await User.findById(clientId);
-
+    const token = req.nat;
     if(client){
         try{
             const list = client.pending_orders;
@@ -80,7 +80,7 @@ module.exports.getPendingClient_get = async (req, res) => {
                 const obj = {order, product}
                 list1.push(obj)
             }
-            res.status(200).send( [{porders: list1}]);
+            res.status(200).send([{porders: list1, token}]);
         }catch(err){
             console.log(err);
         }
@@ -90,9 +90,9 @@ module.exports.getPendingClient_get = async (req, res) => {
 }
 
 module.exports.getActiveClient_get = async (req, res) => {
-    const clientId = req.user._id;
+    const clientId = req.userId;
     const client = await User.findById(clientId);
-
+    const token = req.nat;
     if(client){
         try{
             const list = client.active_orders;
@@ -103,7 +103,7 @@ module.exports.getActiveClient_get = async (req, res) => {
                 const obj = {order, product}
                 list1.push(obj)
             }
-            res.status(200).json( {aorders: list});
+            res.status(200).json( [{aorders: list1,token}]);
         }catch(err){
             console.log(err);
         }

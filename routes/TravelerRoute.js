@@ -1,7 +1,7 @@
 const { Router } = require('express');
 
 const travController = require('../controllers/TravelerController');
-const { checkTraveler, requireTravelerAuth, checkToken_mb } = require('../middleware/Middleware');
+const { checkTraveler, checkToken_mb, requireAuth } = require('../middleware/Middleware');
 
 const router = Router();
 
@@ -11,7 +11,7 @@ const router = Router();
 // router.get('/traveler/:id/new-orders')
 
 // router.get('/traveler/:id/new-orders/:order-id/accept')
-router.get('/traveler/home/neworders/:orderid/accept', requireTravelerAuth,travController.accept_order_GET);
+router.get('/traveler/home/neworders/:orderid/accept', requireAuth,travController.accept_order_GET);
 
 router.post('/traveler/home/neworders/:orderid/accept', checkTraveler,travController.accept_order);
 router.post('/traveler/home/neworders/:orderid/reject', travController.reject_order);
@@ -22,7 +22,7 @@ router.post("/traveler/home/activeorders/:orderid/uploadproof", travController.u
 
 router.post('/traveler/home/activeorders/:orderid/markassent', travController.markshipped)
 
-router.get('/traveler/home/activeorders',requireTravelerAuth, travController.activeOrders_get)
+router.get('/traveler/home/activeorders',requireAuth, travController.activeOrders_get)
 router.get('/traveler/home/pendingorders',checkTraveler, travController.pendingOrders_get);
 router.get('/checktokenmobile', checkToken_mb, travController.splashScreen_get);
 

@@ -227,7 +227,7 @@ const checkToken_mb = async (req, res,next) => {
     next();
   }}
   
-module.exports = {requireTravelerAuth, checkUser, checkTraveler, checkRPtoken, requireAuth, checkToken_mb};
+module.exports = { checkUser, checkTraveler, checkRPtoken, requireAuth, checkToken_mb};
 
 
 

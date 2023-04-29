@@ -2,25 +2,25 @@ const { Router } = require('express');
 const clientController = require('../controllers/ClientController');
 const productController = require('../controllers/ProductController');
 
-const { requireAuth, checkUser, requireClientAuth } = require('../middleware/Middleware');
+const { requireAuth, checkUser} = require('../middleware/Middleware');
 
 
 const router = Router();
-router.get("/client/home/searchproduct", requireClientAuth, (req, res, next) => {
+router.get("/client/home/searchproduct", requireAuth, (req, res, next) => {
     // You don't need any functionality here, so just call next()
     next();
   });
 router.post("/client/home/searchproduct", productController.productsearch_post);
 
-router.post("/client/home/searchproduct/:asin/:quantity", requireClientAuth, productController.productrequest_post);
+router.post("/client/home/searchproduct/:asin/:quantity", requireAuth, productController.productrequest_post);
 
 router.get('/confirmorder/:token/:orderid', clientController.confirm_order_get);
 //Client confirms their order
 
-router.get('/client/home/pendingorders',checkUser, clientController.getPendingClient_get);
+router.get('/client/home/pendingorders',requireAuth, clientController.getPendingClient_get);
 //Client gets list of pending orders
 
-router.get('/client/home/activeorders',checkUser, clientController.getActiveClient_get);
+router.get('/client/home/activeorders',requireAuth, clientController.getActiveClient_get);
 //Client gets list of active orders
 
 router.get('/client/home/activeorders/:orderid', clientController.getActiveOrder_get)
