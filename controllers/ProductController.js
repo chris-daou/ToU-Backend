@@ -268,6 +268,7 @@ module.exports.productrequest_post = async (req, res) => {
   const data = req.body.data;
   const quantity = req.params.quantity;
   const product = await Product.findOne({asin: data.asin});
+  console.log(data);
   try{
     if (product){//if the product already exists, enter this block
       const productId = product._id;
@@ -310,6 +311,7 @@ module.exports.productrequest_post = async (req, res) => {
         return res.status(406).json( {message: 'Product is Out of stock'});      //Then it means that product is out of stock
         
       }
+      console.log("The product is new to the db...")
       const newProduct = new Product({
         title: data.title,
         asin: data.asin,
@@ -325,6 +327,7 @@ module.exports.productrequest_post = async (req, res) => {
         quantity_ordered : quantity
       })//Creating the new Product and saving it in the database
       await newProduct.save();
+      console.log(newProduct.title);
       if(newProduct.weight && newProduct.height && newProduct.width && newProduct.length && 
         newProduct.weight!==-1 && newProduct.height!==-1 && newProduct.width!==-1 && newProduct.length!==-1){
         const Price = parseInt((newProduct.price).replace(/[^\d.]/g, ''));
@@ -347,7 +350,7 @@ module.exports.productrequest_post = async (req, res) => {
         
       }
       else{
-        console.log("This was triggered!")
+        console.log("This was triggered! because no dimensions")
         const order = new Order({
           client: req.userId,
           item: newProduct._id,

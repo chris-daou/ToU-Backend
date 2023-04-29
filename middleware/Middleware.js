@@ -247,6 +247,7 @@ const requireClientAuth = async (req, res, next) => {
       // Pass the user ID to the next middleware
       req.userId = accessPayload.id;
       req.userType = accessPayload.type;
+      req.nat = token;
       next();
       return;
     } catch (err) {
