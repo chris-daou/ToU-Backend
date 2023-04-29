@@ -413,53 +413,49 @@ module.exports.markarrived = async(req, res) => {
     }
 }
 
-module.exports.activeOrders_get = async(req, res) => {
-    const tid = req.traveler._id;
-    const trav = await Traveler.findById(tid);
-    if(trav){
-        try{
-            const list = trav.assigned_orders;
-            const list1 = [];
-            for(let i = 0; i < list.length; i++){
-                const order = await Order.findById(list[i]);
-                const product = await Product.findById(order.item);
-                const obj = {order,product};
-                list1.push(obj);
-            }
-            res.status(200).send({aorders: list1});
-        }
-        catch (err){
-            console.log(err);
-            res.status(500).send({message: 'Server Error Occured'});
-        }
-    }
-    else{
-        res.status(404).send({message: 'Traveler not Found'});
-    }
-}
-
-module.exports.pendingOrders_get = async(req, res) => {
-    const tid = req.traveler._id;
-    const trav = await Traveler.findById(tid);
+module.exports.getPendingTrav_get = async (req, res) => {
+    const travId = req.userId;
+    const trav = await Traveler.findById(travId);
+    const token = req.nat;
     if(trav){
         try{
             const list = trav.new_orders;
-            const list1 = [];
+            const list1 = []
             for(let i = 0; i < list.length; i++){
-                const order = await Order.findById(list[i]);
-                const product = await Product.findById(order.item);
-                const obj = {order,product};
-                list1.push(obj);
+                const order = await Order.findById(list[i])
+                const product = await Product.findById(order.item)
+                const obj = {order, product}
+                list1.push(obj)
             }
-            res.status(200).send({porders: list1});
-        }
-        catch (err){
+            res.status(200).send([{porders: list1, token}]);
+        }catch(err){
             console.log(err);
-            res.status(500).send({message: 'Server Error Occured'});
         }
+    }else{
+        res.status(404).json( { message: 'Client Not Found'})
     }
-    else{
-        res.status(404).send({message: 'Traveler not Found'});
+}
+
+module.exports.getActiveTrav_get = async (req, res) => {
+    const travId = req.userId;
+    const trav = await Traveler.findById(travId);
+    const token = req.nat;
+    if(trav){
+        try{
+            const list = trav.assigned_orders;
+            const list1 = []
+            for(let i = 0; i < list.length; i++){
+                const order = await Order.findById(list[i])
+                const product = await Product.findById(order.item)
+                const obj = {order, product}
+                list1.push(obj)
+            }
+            res.status(200).json( [{aorders: list1,token}]);
+        }catch(err){
+            console.log(err);
+        }
+    }else{
+        res.status(404).json( { message: 'Client Not Found'})
     }
 }
 
