@@ -26,7 +26,7 @@ router.get('/client/home/activeorders',requireAuth, clientController.getActiveCl
 router.get('/client/home/activeorders/:orderid', clientController.getActiveOrder_get)
 //Client gets specific active order
 
-router.get('/client/home/profile',clientController.getProfile);
+router.get('/client/home/profile',requireAuth, clientController.getProfile);
 //Client gets their profile
 
 router.put('/client/home/profile/edit', checkUser, clientController.editProfile);

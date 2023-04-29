@@ -168,7 +168,7 @@ module.exports.complete_order_post = async (req, res) => {
 }
 
 module.exports.getProfile = async (req, res) => {
-    const clientId = req.user._id;
+    const clientId = req.userId;
     const client = await User.findById(clientId);
     if(client){
         res.status(200).json( {client} );
