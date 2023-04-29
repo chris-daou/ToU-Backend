@@ -13,7 +13,7 @@ const router = Router();
 router.post("/signup", authController.singup_post);
 // router.get("/login", authController.login_get);
 router.post("/login", authController.login_post);
-router.get('/logout', authController.logout_get);
+router.post('/logout', authController.logout_post);
 
 //forgot-password
 // router.get("/forgot-password", rpfpController.fp_get);

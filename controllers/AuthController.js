@@ -188,7 +188,7 @@ module.exports.confirmEmail_get = async (req, res) => {
     else res.send("Error Occured");
 }
 
-  module.exports.logout_get = async (req, res) => {
+  module.exports.logout_post = async (req, res) => {
     try {
       // get the user's refresh token from the request header
       const accessToken = req.headers.authorization.split(' ')[1];
