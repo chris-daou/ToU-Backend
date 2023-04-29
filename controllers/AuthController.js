@@ -188,15 +188,19 @@ module.exports.confirmEmail_get = async (req, res) => {
     else res.send("Error Occured");
 }
 
-module.exports.logout_get = (req, res) => {
-    if (req.cookies.uauthjwt) {
-      res.cookie('uauthjwt', '', { maxAge: 1 });
-      res.send('User Cookie Deleted');
-    } else if (req.cookies.tauthjwt) {
-      res.cookie('tauthjwt', '', { maxAge: 1 });
-      res.send('Traveler Cookie Deleted');
-    } else {
-      res.send('No token found to delete');
+  module.exports.logout_get = async (req, res) => {
+    try {
+      // get the user's refresh token from the request header
+      const accessToken = req.headers.authorization.split(' ')[1];
+      
+      // delete the refresh token from the database
+      await Token.deleteOne({ accessToken });
+  
+      // send a successful response
+      return res.status(200).json({ message: 'Logged out successfully' });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ message: 'Error logging out' });
     }
   };
 

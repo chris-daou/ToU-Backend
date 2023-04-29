@@ -169,11 +169,15 @@ module.exports.complete_order_post = async (req, res) => {
 
 module.exports.getProfile = async (req, res) => {
     const clientId = req.userId;
+    const token = req.nat;
     const client = await User.findById(clientId);
     if(client){
-        res.status(200).json( {client} );
+        console.log(client)
+        res.status(200).send({client, token});
     }
+    else{
     res.status(400).json( {message: 'Something went wrong'} )
+    }
 }
 
 module.exports.editProfile = async (req, res) => {
