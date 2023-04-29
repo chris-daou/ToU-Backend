@@ -145,7 +145,12 @@ async function getData(youRL){
         return false;
       }
     });
-  
+    if(price==undefined){
+      price = $(
+        "span[id='price_inside_buybox']"
+      ).text();
+    }
+    
     //Getting the Image source
     let imageSource = $("#landingImage").attr("src");
     if(imageSource==undefined){
