@@ -268,7 +268,8 @@ module.exports.productrequest_post = async (req, res) => {
   const data = req.body.data;
   const quantity = req.params.quantity;
   const product = await Product.findOne({asin: data.asin});
-  console.log(data);
+  console.log("TOKEN THAT REACHED THE API: "+newNAT);
+  console.log("USER IS: "+req.userId);
   try{
     if (product){//if the product already exists, enter this block
       const productId = product._id;
@@ -321,7 +322,7 @@ module.exports.productrequest_post = async (req, res) => {
         length: data.length,
         width: data.width,
         height: data.height,
-        inStock: data.Instock,
+        inStock: data.inStock,
         url: data.url,
         image: data.imageSource,
         quantity_ordered : quantity

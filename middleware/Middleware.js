@@ -119,88 +119,18 @@ const checkRPtoken = async (req, res, next) => {
     }
 }
 
-const requireTravelerAuth = async (req, res, next) => {
+
+
+const requireAuth = async (req, res, next) => {
     const token = req.headers.authorization.split(' ')[1];
     const currentTime = Math.floor(Date.now() / 1000);
-
-
     if (!token) {
-      return res.status(401).json({ message: 'Unauthorized' });
-    }
-  
-    try {
-      const accessPayload = jwt.decode(token);
-  
-      if (!accessPayload) {
-        return res.status(401).json({ message: 'Unauthorized' });
-      }
-  
-      // Check if the token has expired
-      if (accessPayload.exp < currentTime) {
-        // Get the refresh token from the database
-        const ARtoken = await Token.findOne({ accessToken: token });
-  
-        if (!ARtoken) {
-          return res.status(401).json({ message: 'Unauthorized' });
-        }
-  
-        // Verify the refresh token and get its payload
-        let decodedRefreshToken = jwt.decode(ARtoken.refreshToken);
-        
-
-        // Generate a new access token and save it in the database
-        if(decodedRefreshToken && decodedRefreshToken.exp > currentTime){
-            const newAccessToken = jwt.sign(
-                { id: decodedRefreshToken.user, type: decodedRefreshToken.type },
-                process.env.SECRET_JWT,
-                { expiresIn: '2m' }
-              );
-              await Token.updateOne(
-                { refreshToken: ARtoken.refreshToken },
-                { accessToken: newAccessToken }
-              );
-              req.userId = accessPayload.id;
-              req.userType = accessPayload.type;
-              req.nat = newAccessToken;
-              // Set the new access token in the response cookie
-              next();
-              return;
-        }else{
-            return res.status(401).json({ message: 'Unauthorized' });
-        }
-      }
-  
-      // Pass the user ID to the next middleware
-      req.userId = accessPayload.id;
-      req.userType = accessPayload.type;
-      next();
-      return;
-    } catch (err) {
-      console.log(err);
-      return res.status(401).json({ message: 'Unauthorized' });
-    }
-  };
-
-
-const requireClientAuth = async (req, res, next) => {
-    const token = req.headers.authorization.split(' ')[1];
-    const currentTime = Math.floor(Date.now() / 1000);
-    console.log('Curent time '+ currentTime)
-    if (!token) {
-      console.log("0");
       return res.status(401).json({ message: 'Unauthorized 0' });
     }
   
     try {
-      console.log("here")
-      // const decoded = jwt.decode(token);
-      // if(decoded.exp<currentTime){
-      //   return res.status(401).json({ message: 'Unauthorized 6'});
-      // }
       const accessPayload = jwt.decode(token);
-      console.log("still here")
       if (!accessPayload) {
-        console.log("1")
         return res.status(401).json({ message: 'Unauthorized 1' });
       }
   
@@ -211,19 +141,17 @@ const requireClientAuth = async (req, res, next) => {
         const ARtoken = await Token.findOne({ accessToken: token });
   
         if (!ARtoken) {
-          console.log("2")
           return res.status(401).json({ message: 'Unauthorized 2 because there is no AR in db' });
         }
   
         // Verify the refresh token and get its payload
         let decodedRefreshToken = jwt.decode(ARtoken.refreshToken);
-        console.log('HI');
         // Generate a new access token and save it in the database
         if(decodedRefreshToken && decodedRefreshToken.exp > currentTime){
           console.log("we Here")
           decodedRefreshToken = jwt.verify(ARtoken.refreshToken, process.env.SECRET_REFRESH_JWT);
             const newAccessToken = jwt.sign(
-                { id: decodedRefreshToken.user, type: decodedRefreshToken.type },
+                { id: decodedRefreshToken.id, userType: decodedRefreshToken.userType },
                 process.env.SECRET_JWT,
                 { expiresIn: '2m' }
               );
@@ -231,9 +159,10 @@ const requireClientAuth = async (req, res, next) => {
                 { refreshToken: ARtoken.refreshToken },
                 { accessToken: newAccessToken }
               );
-              req.userId = accessPayload.id;
-              req.userType = accessPayload.type;
-              req.nat  = newAccessToken;
+              const decodedNAT = jwt.verify(newAccessToken, process.env.SECRET_JWT);
+              req.userId = decodedNAT.id;
+              req.userType = decodedNAT.userType;
+              req.nat = newAccessToken;
               console.log("renewed the at");
               // Set the new access token in the response cookie
               next();
@@ -298,7 +227,7 @@ const checkToken_mb = async (req, res,next) => {
     next();
   }}
   
-module.exports = {requireTravelerAuth, checkUser, checkTraveler, checkRPtoken, requireClientAuth, checkToken_mb};
+module.exports = {requireTravelerAuth, checkUser, checkTraveler, checkRPtoken, requireAuth, checkToken_mb};
 
 
 
