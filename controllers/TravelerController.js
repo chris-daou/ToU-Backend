@@ -470,3 +470,16 @@ module.exports.splashScreen_get = async(req, res) => {
         res.status(500).send({message: 'Server Error Occured'});
     }
 }
+
+module.exports.getProfile = async (req, res) => {
+    const travId = req.userId;
+    const token = req.nat;
+    const trav = await Traveler.findById(travId);
+    if(trav){
+        console.log(trav)
+        res.status(200).send({trav, token});
+    }
+    else{
+    res.status(400).json( {message: 'Something went wrong'} )
+    }
+}

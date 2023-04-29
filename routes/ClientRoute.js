@@ -29,7 +29,7 @@ router.get('/client/home/activeorders/:orderid', clientController.getActiveOrder
 router.get('/client/home/profile',requireAuth, clientController.getProfile);
 //Client gets their profile
 
-router.put('/client/home/profile/edit', checkUser, clientController.editProfile);
+router.put('/client/home/profile/edit',requireAuth, clientController.editProfile);
 //Change simple things
 
 router.post('/client/home/profile/edit/changepassword',)

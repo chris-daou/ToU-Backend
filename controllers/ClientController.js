@@ -181,12 +181,13 @@ module.exports.getProfile = async (req, res) => {
 }
 
 module.exports.editProfile = async (req, res) => {
-    const clientId = req.user._id;
+    const clientId = req.userId;
+    const token = req.nat;
     const client = await User.findById(clientId);
     if(client){
         try {
             const user = await User.findByIdAndUpdate(clientId, req.body, { new: true });
-            res.send(user);
+            res.send({user, token});
           } catch (error) {
             res.status(500).send(error);
           }
