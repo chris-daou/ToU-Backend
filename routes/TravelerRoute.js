@@ -22,8 +22,8 @@ router.post("/traveler/home/activeorders/:orderid/uploadproof", travController.u
 
 router.post('/traveler/home/activeorders/:orderid/markassent', travController.markshipped)
 
-router.get('/traveler/home/activeorders',requireAuth, travController.getPendingTrav_get)
-router.get('/traveler/home/pendingorders',requireAuth, travController.getActiveTrav_get);
+router.get('/traveler/home/pendingorders',requireAuth, travController.getPendingTrav_get)
+router.get('/traveler/home/activeorders',requireAuth, travController.getActiveTrav_get);
 router.get('/checktokenmobile', checkToken_mb, travController.splashScreen_get);
 
 
