@@ -153,7 +153,7 @@ const sendOrderAcceptEmail = async (email, name, lastname, pname, orderid, order
     let mailOptions = {
         from: 'donotreply.tou.lebanon@outlook.com', // your email address
         to: email, // recipient's email address
-        subject: 'ToU: Order rejected',
+        subject: 'ToU: Order Accepted',
         text: 'Dear ' + name + ' ' + lastname + ',\n\n' + 'This email has been sent to let you know that your requested order:\n'+ pname +'\nhas been accepted.\n The delivery will cost you '+ order_cost +' \nClick on the link to confirm this order.\n'+link + '\n\nBest regards,\n'
         };
         await new Promise((resolve, reject) => {
@@ -341,7 +341,7 @@ module.exports.assign_order_post = async (req, res) =>{
             const pname = product.title;
             const clientId = order.client;
             const client = await User.findById(clientId);
-            sendOrderAcceptEmail(client.email, client.name, client.lastname, pname, orderId, order.cost);
+            if (!order.client_confirmed) sendOrderAcceptEmail(client.email, client.name, client.lastname, pname, orderId, order.cost);
             sendAssignmentEmail(traveler.email, traveler.name, traveler.lastname);
             res.status(200).json('Successfully Assigned Order & sent email to client and traveler');
         }catch(err){

@@ -62,7 +62,7 @@ module.exports.accept_order_GET = async (req, res) => {
 module.exports.accept_order = async (req, res) => {
     const travelerId = req.userId;
     const orderId = req.params.orderid;
-
+    const token = req.nat;
     try {
         const traveler = await Traveler.findById(travelerId);
         const order = await Order.findById(orderId);
@@ -82,10 +82,14 @@ module.exports.accept_order = async (req, res) => {
                 await traveler.save();
             }
             traveler.assigned_orders.push(orderId); // add the order to the assigned_orders array
-            
+
             order.waiting_resp = false;
             const clientId = order.client;
             const client = await User.findById(clientId);
+            let indexc = client.pending_orders.indexOf(orderId);
+            if (indexc !== -1) {
+                client.pending_orders.splice(indexc, 1);
+            }
             client.active_orders.push(orderId);
             await client.save();
             const prodId = order.item;
@@ -102,7 +106,7 @@ module.exports.accept_order = async (req, res) => {
             sendAssignedEmailClient(client.email, client.name, client.lastname, prod.title, date_string, new_date_string);
             await order.save();
             await traveler.save(); // save the updated traveler object to the database
-            res.status(200).json({message: 'Successfully Accepted Order'});
+            res.status(200).json({message: 'Successfully Accepted Order',token});
         }
     } catch (err) {
         console.log(err);
@@ -112,17 +116,18 @@ module.exports.accept_order = async (req, res) => {
 
 module.exports.reject_order = async (req, res) => {
     const travelerId = req.userId;
-    const orderId = req.params.id;
-
+    const orderId = req.params.orderid;
+    const token = req.nat;
     try {
         const traveler = await Traveler.findById(travelerId);
         const order = await Order.findById(orderId);
 
-        if(order.status == 0 && order.waiting_resp == true && traveler.new_orders.includes(orderId)) {
+        if((order.status == 1 || order.status == 2) && order.waiting_resp == true && traveler.new_orders.includes(orderId)) {
             let index = traveler.new_orders.indexOf(orderId);
             if (index !== -1) {
-                traveler.new_orders = traveler.new_orders.splice(index, 1);
+                traveler.new_orders.splice(index, 1);
             }
+            order.status = 0;
             order.pickup_location = "";
             order.waiting_resp = false;
             order.traveler = null;
@@ -130,7 +135,7 @@ module.exports.reject_order = async (req, res) => {
             await traveler.save(); // save the updated traveler object to the database
         }
 
-        res.status(200).json({ message: 'Order rejected' });
+        res.status(200).json({ message: 'Order rejected' , token});
     } catch (err) {
         console.log(err.message);
         res.status(400).json({ message: 'Failed to assign order' });
