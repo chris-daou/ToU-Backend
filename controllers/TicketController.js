@@ -34,14 +34,15 @@ const upload1 = multer({
         s3:s3,
         acl:'public-read',
         key:(req, file, cb) => {
-            const filename = req.traveler._id + ' _ ' +  Date.now() + ' _ ticket.pdf';
+            const filename = req.userId + ' _ ' +  Date.now() + ' _ ticket.pdf';
             cb(null, filename);
         } 
     })
 })
 
 module.exports.uploadTicket_post = async (req, res) => {
-    const traveler = req.traveler._id;
+    const traveler = req.userId;
+    const token = req.nat;
     const ticket = await Ticket.create({traveler});
     const tid = ticket._id;
     const trav = await Traveler.findById(traveler);
@@ -123,7 +124,8 @@ module.exports.uploadTicket_post = async (req, res) => {
                         ticket.pdf_file = filename;
                         await ticket.save();
                         trav.ticket = ticket._id;
-                        res.status(200).send(ticket);
+                        await trav.save();
+                        res.status(200).send({ticket,token});
                     } 
                     catch (err) {
                         console.log(err);

@@ -3,6 +3,7 @@ const Order = require('../models/Order');
 const User = require('../models/User');
 const Traveler = require('../models/Traveler');
 const Feedback = require('../models/Feedback');
+const Ticket = require('../models/Ticket');
 const jwt = require('jsonwebtoken');
 const cheerio = require('cheerio');
 const request = require('request-promise')
@@ -207,10 +208,11 @@ module.exports.cancel_flight = async (req, res) => {
 
 module.exports.providePickup_post = async (req, res) => {
     const travelerId = req.userId;
+    const token = req.nat;
     const traveler = await Traveler.findById(travelerId);
     traveler.provided_pickup = req.body.pickupLocation;
     await traveler.save();
-    res.send('Done');
+    res.status(200).send({message: 'Pickup location provided',token});
 };
 
 const upload1 = multer({
@@ -489,7 +491,8 @@ module.exports.hasTicket = async (req, res) => {
         const trav = await Traveler.findById(travId);
         if(trav){
             if(trav.active){
-                return res.status(200).send({hasTicket:true, token});
+                const ticket = await Ticket.findById(trav.ticket);
+                return res.status(200).send({hasTicket:true,ticket, token});
             }
             else{
                 return res.status(200).send({hasTicket:false, token});

@@ -1,6 +1,7 @@
 const { Router } = require('express');
 
 const travController = require('../controllers/TravelerController');
+const ticketController = require('../controllers/TicketController');
 const { checkTraveler, checkToken_mb, requireAuth } = require('../middleware/Middleware');
 
 const router = Router();
@@ -29,7 +30,8 @@ router.get('/profile', requireAuth, travController.getProfile);
 router.post('/profile/edit', requireAuth, travController.editProfile);
 router.get('/hasTicket', requireAuth, travController.hasTicket);
 router.post('cancelflight', requireAuth, travController.cancel_flight);
-router.get('/providePickup',requireAuth, travController.providePickup_post);
+router.post('/providePickup',requireAuth, travController.providePickup_post);
+router.post('/traveler/home/uploadTicket',requireAuth, ticketController.uploadTicket_post);
 
 // router.get('/traveler/:id/completed-orders')
 // router.get('/traveler/:id/completed-orders/:order-id')
