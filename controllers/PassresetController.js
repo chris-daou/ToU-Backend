@@ -57,7 +57,7 @@ module.exports.fp_post = async (req, res) => {
         type: user.type
         }
         const token = jwt.sign(payload, secret, {expiresIn: '45m'});
-        const link = 'http://localhost:3000/reset-password/'+user._id+"/"+token;
+        const link = 'http://localhost:3000/reset-pwd-client/'+user._id+"/"+token;
         sendEmail(payload.email, payload.name, payload.lastname, link);
         console.log(link);
         console.log(payload);
