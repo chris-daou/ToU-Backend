@@ -250,6 +250,7 @@ module.exports.getRate_get = async (req, res) => {
 }
 
 module.exports.giveFeedback_post = async(req, res) => {
+    const token = req.nat;
     const orderId = req.params.orderid;
     const order = await Order.findById(orderId);
     const { rating, arrived_on_time, as_described, good_service, message } = req.body;
@@ -258,7 +259,7 @@ module.exports.giveFeedback_post = async(req, res) => {
             const feedback = await Feedback.create({order: orderId, rating, arrived_on_time, as_described, good_service, message});
             order.feedback = feedback._id;
             await order.save();
-            res.status(201).json({message: 'Feedback added successfully'});
+            res.status(201).json({message: 'Feedback added successfully', token});
         }
         catch(err){
             console.log(err);
@@ -296,5 +297,52 @@ module.exports.submitContactForm = async(req, res) => {
 
     }else{
         return res.status(404).json({message: 'Client not found'})
+    }
+}
+
+module.exports.submitSupportForm = async(req, res) => {
+    const clientId = req.userId;
+    const client = await User.findById(clientId);
+    const token = req.nat;
+    if(!client){
+        const trav = await Traveler.findById(clientId);
+        let mailOptions = {
+            from: 'donotreply.tou.lebanon@outlook.com', // your email address
+            to: 'tou.lebanon@gmail.com', // recipient's email address
+            subject: req.body.subject,
+            text: 'TRAVELER SUPPORT\n\n' + 'traveler('+ clientId +'):\nemail:'+trav.email+'\n\n' + 'message:\n'+req.body.message
+            };
+            await new Promise((resolve, reject) => {
+                transporter.sendMail(mailOptions, (error, info) => {
+                    if (error) {
+                        console.log(error);
+                        reject(error);
+                    } else {
+                        console.log('Email sent: ' + info.response);
+                        resolve();
+                    }
+                });
+            });
+            return res.status(200).send({message: 'Successfully Submitted Support Form', token})
+    }
+    else{
+        let mailOptions = {
+            from: 'donotreply.tou.lebanon@outlook.com', // your email address
+            to: 'tou.lebanon@gmail.com', // recipient's email address
+            subject: req.body.subject,
+            text: 'CLIENT SUPPORT\n\n' + 'client('+ clientId +'):\nemail:'+client.email+'\n\n' + 'message:\n'+req.body.message
+            };
+            await new Promise((resolve, reject) => {
+                transporter.sendMail(mailOptions, (error, info) => {
+                    if (error) {
+                        console.log(error);
+                        reject(error);
+                    } else {
+                        console.log('Email sent: ' + info.response);
+                        resolve();
+                    }
+                });
+            });
+        return res.status(200).send({message: 'Successfully Submitted Support Form', token})
     }
 }

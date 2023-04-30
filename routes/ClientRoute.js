@@ -38,12 +38,14 @@ router.post('/client/home/profile/edit/changepassword',)
 router.post('/client/home/activeorder/:orderid/markascomplete', requireAuth, clientController.complete_order_post);
 //Client completes order
 
-router.post('client/home/activeorder/:orderid/markascomplete/feedback', clientController.giveFeedback_post);
+router.post('client/home/activeorder/:orderid/markascomplete/feedback',requireAuth, clientController.giveFeedback_post);
 
 router.post('/getrate', clientController.getRate_get);
 
 
 //Contact Forms
 router.post('/client/home/contactform', requireAuth, clientController.submitContactForm)
+
+router.post('/support', requireAuth, clientController.submitSupportForm)
 
 module.exports = router;
