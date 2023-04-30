@@ -20,8 +20,6 @@ const router = Router();
 // router.get('/traveler/:id/active-orders/:order-id')
 
 
-router.post('/traveler/home/activeorders/:orderid/markassent', travController.markshipped)
-
 router.get('/traveler/home/pendingorders',requireAuth, travController.getPendingTrav_get);
 router.get('/traveler/home/activeorders',requireAuth, travController.getActiveTrav_get);
 router.get('/checktokenmobile', requireAuth, travController.splashScreen_get);
@@ -34,6 +32,8 @@ router.post('/traveler/home/uploadTicket',requireAuth, ticketController.uploadTi
 router.post('/traveler/home/neworders/:orderid/accept', requireAuth,travController.accept_order);
 router.post('/traveler/home/neworders/:orderid/reject', requireAuth, travController.reject_order);
 router.post("/traveler/home/activeorders/:orderid/uploadproof",requireAuth, travController.uploadProof_post);
+router.post('/traveler/home/activeorders/:orderid/markassent', requireAuth, travController.markshipped);
+router.post("/traveler/home/activeorders/:orderid/markarrived",requireAuth, travController.markarrived);
 // router.get('/traveler/:id/completed-orders')
 // router.get('/traveler/:id/completed-orders/:order-id')
 

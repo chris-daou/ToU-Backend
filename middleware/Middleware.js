@@ -107,12 +107,15 @@ const checkRPtoken = async (req, res, next) => {
             const payload = jwt.verify(token, secret);
             if(payload){
                 next();
+                return;
             }else{
                 res.status(400).json({message: 'Invalid Token'})
+                return;
             }
         }catch(err){
             console.log(err);
             res.status(500).json({message: 'Server Error Occured.'})
+            return;
         }
     }else{
         res.status(400).json({message: 'Invalid Token'})

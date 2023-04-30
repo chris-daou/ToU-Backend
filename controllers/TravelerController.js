@@ -325,6 +325,7 @@ module.exports.uploadProof_post = async (req, res) => {
 
 
 module.exports.markshipped = async(req, res) => {
+    const token = req.nat;
     const orderId = req.params.orderid;
     const order = await Order.findById(orderId);
     if(order){
@@ -340,6 +341,7 @@ module.exports.markshipped = async(req, res) => {
 
             sendOnTheWayEmail(client.email, client.name, client.lastname, prod.title)
            } 
+           return res.status(200).json({message: 'Order marked as shipped', token});
         }catch(err){
             console.log(err);
             res.status(500).json({message: 'Server Error Occured'});
@@ -373,6 +375,7 @@ const sendArrivedEmail = async (email, name, lastname, pname) => {
 
 
 module.exports.markarrived = async(req, res) => {
+    const token = req.nat;
     const orderId = req.params.orderid;
     const order = await Order.findById(orderId);
     if(order){
@@ -387,7 +390,8 @@ module.exports.markarrived = async(req, res) => {
             const prod = await Product.findById(prodId);
 
             sendArrivedEmail(client.email, client.name, client.lastname, prod.title);
-           } 
+           }
+              return res.status(200).json({message: 'Order marked as arrived', token}); 
         }catch(err){
             console.log(err);
             res.status(500).json({message: 'Server Error Occured'});

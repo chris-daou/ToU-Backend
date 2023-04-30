@@ -543,3 +543,26 @@ module.exports.setTestimonial_post = async(req, res) => {
         res.status(500).json({message: 'Server Error occured'});
     }
 }
+
+module.exports.markSentOut = async(req, res) => {
+    try{
+        const orderid = req.params.orderid;
+        const order = await Order.findById(orderid);
+        if(order){
+            if(order.status == 5){
+                order.status = 6;
+                await order.save();
+            }
+            else{
+                return res.status(400).json({message: 'Order is not at arrived stage '});
+            }
+            return res.status(200).json({message: 'Order has been successfully marked as sent.'});
+        }else{
+            res.status(404).json({message: 'Order not found.'});
+        }
+    }
+    catch(err){
+        console.log(err);
+        res.status(500).json({message: 'Server Error occured'});
+    }
+}

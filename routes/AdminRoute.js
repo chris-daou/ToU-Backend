@@ -56,5 +56,6 @@ router.post('admin/home/travelers/revokedtravelers/:travelerid/unrevoke', adminC
 
 router.get('/admin/home/travelers/actvietravelers',adminController.getActiveTravelers_get);
 
+router.post('/admin/home/activeorders/:orderid/markassentout', adminController.markSentOut);
 
 module.exports = router;

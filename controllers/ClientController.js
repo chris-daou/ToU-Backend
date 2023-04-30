@@ -134,10 +134,10 @@ module.exports.getActiveOrder_get = async (req, res) => {
 module.exports.complete_order_post = async (req, res) => {
     const token = req.nat;
     const clientId = req.userId;
-    const client = User.findById(clientId);
+    const client = await User.findById(clientId);
     const orderId = req.params.orderid;
-    const order = Order.findById(orderId);
-
+    const order = await Order.findById(orderId);
+    console.log(client)
     if(client && order && client.active_orders.includes(orderId) && order.status==6){
         try{
             order.status = 7;
