@@ -18,7 +18,7 @@ const router = Router();
 
 // router.get('/traveler/:id/active-orders')
 // router.get('/traveler/:id/active-orders/:order-id')
-router.post("/traveler/home/activeorders/:orderid/uploadproof", travController.uploadProof_post);
+
 
 router.post('/traveler/home/activeorders/:orderid/markassent', travController.markshipped)
 
@@ -28,11 +28,12 @@ router.get('/checktokenmobile', requireAuth, travController.splashScreen_get);
 router.get('/profile', requireAuth, travController.getProfile);
 router.get('/hasTicket', requireAuth, travController.hasTicket);
 router.post('/profile/edit', requireAuth, travController.editProfile);
-router.post('cancelflight', requireAuth, travController.cancel_flight);
+router.post('/cancelflight', requireAuth, travController.cancel_flight);
 router.post('/providePickup',requireAuth, travController.providePickup_post);
 router.post('/traveler/home/uploadTicket',requireAuth, ticketController.uploadTicket_post);
 router.post('/traveler/home/neworders/:orderid/accept', requireAuth,travController.accept_order);
 router.post('/traveler/home/neworders/:orderid/reject', requireAuth, travController.reject_order);
+router.post("/traveler/home/activeorders/:orderid/uploadproof",requireAuth, travController.uploadProof_post);
 // router.get('/traveler/:id/completed-orders')
 // router.get('/traveler/:id/completed-orders/:order-id')
 

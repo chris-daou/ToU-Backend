@@ -129,6 +129,7 @@ module.exports.reject_order = async (req, res) => {
             }
             order.status = 0;
             order.pickup_location = "";
+            order.estimated_arrival = "";
             order.waiting_resp = false;
             order.traveler = null;
             await order.save();
@@ -144,13 +145,15 @@ module.exports.reject_order = async (req, res) => {
 
 module.exports.cancel_flight = async (req, res) => {
     const travelerId = req.userId;
-            const traveler = await Traveler.findById(travelerId);
+    const traveler = await Traveler.findById(travelerId);
     try{
         for (let i = 0; i < traveler.new_orders.length; i++) {
             const order = await Order.findById(traveler.new_orders[i]);
-            order.traveler = "";
+            order.traveler = null;
             order.pickup_location = "";
             order.waiting_resp = false;
+            order.status = 0;
+            order.estimated_arrival = "";
             await order.save();
             let mailOptions = {
                 from: 'donotreply.tou.lebanon@outlook.com', // your email address
@@ -173,9 +176,9 @@ module.exports.cancel_flight = async (req, res) => {
         };
         for (let i = 0; i < traveler.assigned_orders.length; i++) {
             const order = await Order.findById(traveler.assigned_orders[i]);
-            order.traveler = "";
+            order.traveler = null;
             order.waiting_resp = false;
-            order.status = 1;
+            order.status = 0;
             order.estimated_arrival = "";
             order.pickup_location = "";
             await order.save();
@@ -198,13 +201,13 @@ module.exports.cancel_flight = async (req, res) => {
                 });
             }); 
         };
-        const canceled = traveler.canceled_orders.concat(traveler.assigned_orders, traveler.new_orders);
+        traveler.canceled_orders.concat(traveler.assigned_orders, traveler.new_orders);
         traveler.active = false;
         traveler.new_orders = [];
         traveler.assigned_orders = [];
         traveler.provided_pickup = "";
-        traveler.canceled_orders = canceled;
         await traveler.save();
+        return res.status(200).json({ message: 'Flight canceled' , token});
     }
     catch{
         res.status(400).json({ message: 'Failed to cancel flight' });
@@ -279,6 +282,7 @@ const upload2 = multer({
 
 
 module.exports.uploadProof_post = async (req, res) => {
+    const token = req.nat;
     upload2.single('file')(req, res, async (err) => {
       if (err) {
         console.log(err);
@@ -292,7 +296,7 @@ module.exports.uploadProof_post = async (req, res) => {
       order.proof = filename;
       order.save().then(console.log(order));
       
-      res.send('Done');
+      res.send({message:'Done', token});
     });
   };
 
