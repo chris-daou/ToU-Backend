@@ -249,22 +249,39 @@ module.exports.productsearch_post = (req, res) => {
       return res.status(400).json({message: 'Invalid or Empty Link'})
     }
     getData(productLink).then((data) => {
+      if (data.weight == -1){
+        const details = {
+          title : data.title,
+          price : data.price,
+          asin : data.asin,
+          imageSource : data.imageSource,
+          dimensions : data.length+" x "+data.width+" x "+data.height+" in",
+          weight: data.weight,
+          length: data.length,
+          width: data.width,
+          height: data.height,
+          inStock : data.Instock,
+          url: productLink
+      }
+        return res.json(details);
+      }
+      else{
         const details = {
             title : data.title,
             price : data.price,
             asin : data.asin,
             imageSource : data.imageSource,
-            dimensions : data.dimensions,
+            dimensions : data.length+" x "+data.width+" x "+data.height+" in  |  "+data.weight+" lbs",
             weight: data.weight,
             length: data.length,
             width: data.width,
             height: data.height,
-            Instock : data.Instock,
+            inStock : data.Instock,
             url: productLink
         }
         return res.json(details);
+      }
     })
-
 }
 
 module.exports.productrequest_post = async (req, res) => {
