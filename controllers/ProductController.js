@@ -249,7 +249,23 @@ module.exports.productsearch_post = (req, res) => {
       return res.status(400).json({message: 'Invalid or Empty Link'})
     }
     getData(productLink).then((data) => {
-      if (data.weight == -1){
+      if(data.length == -1 || data.height == -1 || data.width == -1){
+        const details = {
+          title : data.title,
+          price : data.price,
+          asin : data.asin,
+          imageSource : data.imageSource,
+          dimensions : data.dimensions,
+          weight: data.weight,
+          length: data.length,
+          width: data.width,
+          height: data.height,
+          inStock : data.Instock,
+          url: productLink
+      }
+        return res.json(details);
+      }
+      else if (data.weight == -1){
         const details = {
           title : data.title,
           price : data.price,
