@@ -461,9 +461,17 @@ module.exports.getActiveTrav_get = async (req, res) => {
 
 module.exports.splashScreen_get = async(req, res) => {
     try{
-        console.log(req.stat)
-        const stat = req.stat;
-        res.status(200).send({status: stat});
+        const token = req.nat;
+        const type = req.userType;
+        if(type == 'User'){
+            return res.status(200).send({status: 691, token});
+        }
+        else if(type == 'Traveler'){
+            return res.status(200).send({status: 690, token});
+        }
+        else{
+            return res.status(200).send({status: 692, token:''});
+        }
     }
     catch(err){
         console.log(err);
@@ -481,5 +489,22 @@ module.exports.getProfile = async (req, res) => {
     }
     else{
     res.status(400).json( {message: 'Something went wrong'} )
+    }
+}
+
+
+module.exports.editProfile = async (req, res) => {
+    const travId = req.userId;
+    const token = req.nat;
+    const trav = await Traveler.findById(travId);
+    if(trav){
+        try {
+            const trav = await Traveler.findByIdAndUpdate(travId, req.body, { new: true });
+            res.send({trav, token});
+          } catch (error) {
+            res.status(500).send(error);
+          }
+    }else{
+        res.status(500).send(error);
     }
 }

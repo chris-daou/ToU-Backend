@@ -175,7 +175,7 @@ const requireAuth = async (req, res, next) => {
   
       // Pass the user ID to the next middleware
       req.userId = accessPayload.id;
-      req.userType = accessPayload.type;
+      req.userType = accessPayload.userType;
       req.nat = token;
       next();
       return;

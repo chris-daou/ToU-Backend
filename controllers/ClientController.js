@@ -9,6 +9,7 @@ const bcrypt = require('bcrypt');
 const cheerio = require('cheerio');
 const request = require('request');
 const Feedback = require('../models/Feedback');
+const ContactForm = require('../models/Contact');
 
 let transporter = nodemailer.createTransport({
     host: 'smtp-mail.outlook.com',
@@ -131,7 +132,7 @@ module.exports.getActiveOrder_get = async (req, res) => {
 }
 
 module.exports.complete_order_post = async (req, res) => {
-    const clientId = req.user._id;
+    const clientId = req.userId;
     const client = User.findById(clientId);
     const orderId = req.params.orderid;
     const order = Order.findById(orderId);
@@ -141,7 +142,7 @@ module.exports.complete_order_post = async (req, res) => {
             order.status = 7;
             const travelerId = order.traveler;
             const traveler = await Traveler.findById(travelerId);
-            const prodId = order.title;
+            const prodId = order.item;
             const prod = await Product.findById(prodId);
 
             let index = traveler.assigned_orders.indexOf(orderId);
@@ -151,10 +152,13 @@ module.exports.complete_order_post = async (req, res) => {
             traveler.completed_orders.push(orderId);
             let indexc = client.active_orders.indexOf(orderId);
             if (indexc !== -1) {
-                client.active_orders.splice(index, 1);
+                client.active_orders.splice(indexc, 1);
             }
             client.completed_orders.push(orderId);
             await client.save();
+            if(traveler.new_orders.length==0 && traveler.assigned_orders.length==0){
+                traveler.active = fasle;
+            }
             await traveler.save();
             sendCompletiontoTraveler(traveler.email, traveler.name, traveler.lastname, prod.title);
 
@@ -261,5 +265,34 @@ module.exports.giveFeedback_post = async(req, res) => {
     }
     else{
         res.status(404).json({message: 'Order not Found.'})
+    }
+}
+
+module.exports.submitContactForm = async(req, res) => {
+    const clientId = req.userId;
+    const client = await User.findById(clientId);
+    const token = req.nat;
+    if(client){
+        try{
+            const email = req.body.email;
+            const team = req.body.team;
+            const subject = req.body.subject;
+            const message = req.body.message;
+
+            const contactForm = new ContactForm({
+            email, team, subject, message
+            }); 
+
+            contactForm.save().then(() => {
+                return res.status(200).json({message: 'Successfully Submitted Contact Form', accessToken: token})
+            })
+
+        }catch(err){
+            console.log(err);
+            return res.status(400).json({ message: 'Something went wrong.'})
+        }
+
+    }else{
+        return res.status(404).json({message: 'Client not found'})
     }
 }

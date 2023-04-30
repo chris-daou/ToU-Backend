@@ -24,9 +24,9 @@ router.post('/traveler/home/activeorders/:orderid/markassent', travController.ma
 
 router.get('/traveler/home/pendingorders',requireAuth, travController.getPendingTrav_get)
 router.get('/traveler/home/activeorders',requireAuth, travController.getActiveTrav_get);
-router.get('/checktokenmobile', checkToken_mb, travController.splashScreen_get);
+router.get('/checktokenmobile', requireAuth, travController.splashScreen_get);
 router.get('/profile', requireAuth, travController.getProfile);
-
+router.post('/profile/edit', requireAuth, travController.editProfile);
 
 
 // router.get('/traveler/:id/completed-orders')
