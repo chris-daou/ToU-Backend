@@ -300,7 +300,7 @@ module.exports.get_waitingpending_get = async (req, res) => {
 
 module.exports.getActiveTravelers_get = async (req, res) => {
     try{
-        const activeTravelers = await Traveler.find({active: true, provided_pickup: false, revoked: false, ticket: {$ne: null, $ne: undefined}});
+        const activeTravelers = await Traveler.find({active: true, revoked: false, ticket: {$ne: null, $ne: undefined}});
 
         if(activeTravelers.length>0){
             res.status(200).json(activeTravelers);
@@ -319,7 +319,7 @@ module.exports.assign_order_post = async (req, res) =>{
     const travelerId = req.params.travelerid;
     const order = await Order.findById(orderId);
     const traveler = await Traveler.findById(travelerId);
-    if(!order.ticket && traveler.provided_pickup){
+    if(!traveler.active){
         res.status(400).json({message: 'Traveler has yet to provide Ticket'})
     }
     if(order && traveler && traveler.active==true && !traveler.revoked){
@@ -332,6 +332,7 @@ module.exports.assign_order_post = async (req, res) =>{
             order.waiting_resp = true;
             traveler.new_orders.push(orderId);
             order.status = 1;
+            order.pickup_location = traveler.provided_pickup;
             await order.save();
             await traveler.save();
             

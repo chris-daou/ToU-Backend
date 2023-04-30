@@ -132,6 +132,7 @@ module.exports.getActiveOrder_get = async (req, res) => {
 }
 
 module.exports.complete_order_post = async (req, res) => {
+    const token = req.nat;
     const clientId = req.userId;
     const client = User.findById(clientId);
     const orderId = req.params.orderid;
@@ -158,11 +159,12 @@ module.exports.complete_order_post = async (req, res) => {
             await client.save();
             if(traveler.new_orders.length==0 && traveler.assigned_orders.length==0){
                 traveler.active = fasle;
+                traveler.provided_pickup = "";
             }
             await traveler.save();
             sendCompletiontoTraveler(traveler.email, traveler.name, traveler.lastname, prod.title);
 
-            res.status(200).json( {message: 'Successfully Comepleted Order'});
+            res.status(200).json( {message: 'Successfully Comepleted Order', token});
         }catch(err){
             console.log(err);
         }

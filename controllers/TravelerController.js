@@ -59,7 +59,7 @@ module.exports.accept_order_GET = async (req, res) => {
     res.send("You are here. "+req.userId)
 }
 module.exports.accept_order = async (req, res) => {
-    const travelerId = req.traveler._id;
+    const travelerId = req.userId;
     const orderId = req.params.orderid;
 
     try {
@@ -110,7 +110,7 @@ module.exports.accept_order = async (req, res) => {
 }
 
 module.exports.reject_order = async (req, res) => {
-    const travelerId = req.traveler._id;
+    const travelerId = req.userId;
     const orderId = req.params.id;
 
     try {
@@ -122,6 +122,7 @@ module.exports.reject_order = async (req, res) => {
             if (index !== -1) {
                 traveler.new_orders = traveler.new_orders.splice(index, 1);
             }
+            order.pickup_location = "";
             order.waiting_resp = false;
             order.traveler = null;
             await order.save();
@@ -136,12 +137,13 @@ module.exports.reject_order = async (req, res) => {
 }
 
 module.exports.cancel_flight = async (req, res) => {
-    const travelerId = req.traveler._id;
+    const travelerId = req.userId;
             const traveler = await Traveler.findById(travelerId);
     try{
         for (let i = 0; i < traveler.new_orders.length; i++) {
             const order = await Order.findById(traveler.new_orders[i]);
             order.traveler = "";
+            order.pickup_location = "";
             order.waiting_resp = false;
             await order.save();
             let mailOptions = {
@@ -169,6 +171,7 @@ module.exports.cancel_flight = async (req, res) => {
             order.waiting_resp = false;
             order.status = 1;
             order.estimated_arrival = "";
+            order.pickup_location = "";
             await order.save();
             let mailOptions = {
                 from: 'donotreply.tou.lebanon@outlook.com', // your email address
@@ -193,6 +196,7 @@ module.exports.cancel_flight = async (req, res) => {
         traveler.active = false;
         traveler.new_orders = [];
         traveler.assigned_orders = [];
+        traveler.provided_pickup = "";
         traveler.canceled_orders = canceled;
         await traveler.save();
     }
@@ -202,41 +206,10 @@ module.exports.cancel_flight = async (req, res) => {
 };
 
 module.exports.providePickup_post = async (req, res) => {
-    const travelerId = req.traveler._id;
-    const loc = req.body.location;
+    const travelerId = req.userId;
     const traveler = await Traveler.findById(travelerId);
-    for(let i = 0; i < traveler.assigned_orders.length; i++) {
-        const order = await Order.findById(traveler.assigned_orders[i]);
-        order.pickup_location = loc;
-        await order.save();
-    };
-    for(let i = 0; i < traveler.new_orders.length; i++) {
-        const order = await Order.findById(traveler.new_orders[i]);
-            order.waiting_resp = false;
-            order.traveler = "";
-            await order.save();
-            let mailOptions = {
-                from: 'donotreply.tou.lebanon@outlook.com', // your email address
-                to: trav.email, // recipient's email address
-                subject: 'ToU: Order back to pending',
-                text: 'Dear ' + (await User.findById(order.client).name) + ' ' + (await User.findById(order.client).lastname) + ',\n\n' + 'Unfortunately, the traveler we assigned the order to did not accept it. Your order is still pending to be assigned to another traveler.\nFor more information, please contact us.\n\n' + 'Best regards,\n' + 'The ToU Team'
-            };
-            await new Promise((resolve, reject) => {
-                transporter.sendMail(mailOptions, (error, info) => {
-                    if (error) {
-                        console.log(error);
-                        reject(error);
-                    } else {
-                        console.log('Email sent: ' + info.response);
-                        console.log(link);
-                        resolve();
-                    }
-                });
-            });
-    };
-    traveler.provided_pickup = true;
-    traveler.new_orders = [];
-    traveler.save();
+    traveler.provided_pickup = req.body.pickupLocation;
+    await traveler.save();
     res.send('Done');
 };
 
@@ -506,5 +479,28 @@ module.exports.editProfile = async (req, res) => {
           }
     }else{
         res.status(500).send(error);
+    }
+}
+
+module.exports.hasTicket = async (req, res) => {
+    const travId = req.userId;
+    const token = req.nat;
+    try{
+        const trav = await Traveler.findById(travId);
+        if(trav){
+            if(trav.active){
+                return res.status(200).send({hasTicket:true, token});
+            }
+            else{
+                return res.status(200).send({hasTicket:false, token});
+            }
+        }
+        else{
+            res.status(400).json( {message: 'Something went wrong'} )
+        }
+    }
+    catch(err){
+        console.log(err);
+        res.status(500).send({message: 'Server Error Occured'});
     }
 }

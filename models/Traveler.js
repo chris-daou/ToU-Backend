@@ -78,8 +78,8 @@ const travelerSchema = new mongoose.Schema({
     ref: 'Order'
   }],
   provided_pickup: {
-    type: Boolean,
-    default: false
+    type: String,
+    default: ""
   },
   ticket: {
     type: mongoose.Schema.Types.ObjectId,
