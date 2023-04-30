@@ -141,6 +141,7 @@ module.exports.complete_order_post = async (req, res) => {
     if(client && order && client.active_orders.includes(orderId) && order.status==6){
         try{
             order.status = 7;
+            await order.save();
             const travelerId = order.traveler;
             const traveler = await Traveler.findById(travelerId);
             const prodId = order.item;
@@ -148,7 +149,7 @@ module.exports.complete_order_post = async (req, res) => {
 
             let index = traveler.assigned_orders.indexOf(orderId);
             if (index !== -1) {
-                traveler.new_orders.splice(index, 1);
+                traveler.assigned_orders.splice(index, 1);
             }
             traveler.completed_orders.push(orderId);
             let indexc = client.active_orders.indexOf(orderId);
@@ -158,7 +159,7 @@ module.exports.complete_order_post = async (req, res) => {
             client.completed_orders.push(orderId);
             await client.save();
             if(traveler.new_orders.length==0 && traveler.assigned_orders.length==0){
-                traveler.active = fasle;
+                traveler.active = false;
                 traveler.provided_pickup = "";
             }
             await traveler.save();
