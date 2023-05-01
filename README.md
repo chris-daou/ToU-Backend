@@ -1,5 +1,5 @@
 
-![Logo](logo.jpg)
+![Logo](sides/logo.jpg)
 
 
 # ToU Backend Documentation
@@ -27,7 +27,8 @@ We used AWS S3 bucket to upload the required files such as the travelers' ticket
 
 ## Documentation
 
-[Documentation](https://linktodocumentation)
+-[Pre-Development Documentation](sides/document.pdf)
+-[PostDevelopment Documentation](sides/API%20documentation.pdf)
 
 
 ## Environment Variables
@@ -94,6 +95,16 @@ Start the server
 ```bash
   nodemon app.js
 ```
+
+
+##Data Model Diagram
+
+![Data Model Diagram](sides/ToU%20Data%20Model%20Diagram.jpg)
+
+
+## Architectural Design
+
+![Architectural Design](sides/Architectural%20Design.jpg)
 
 
 ## Support
