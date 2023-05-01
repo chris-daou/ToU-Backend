@@ -40,6 +40,14 @@ const upload1 = multer({
     })
 })
 
+/*The `uploadTicket_post` function first extracts the `traveler`, `token` and `fileData` from the HTTP request. 
+It then creates a new `Ticket` object in the database with the `traveler` ID and assigns it to the `ticket` variable. 
+If the `traveler` object is found in the database and its `active` status is false, the function proceeds with uploading the ticket. 
+It uses the `upload.single` middleware to handle the file upload and extracts information from the uploaded PDF file using regular expressions.
+If the information is successfully extracted, the `ticket` object is populated with the information and saved to the database. The `traveler`'s `active` 
+status is updated to true and an email is sent to the `traveler` informing them that their ticket has been received.
+If any of the information cannot be extracted or is invalid, an HTTP response with a status code of 400 and an error message is sent, and the `Ticket` object is 
+deleted from the database.*/
 module.exports.uploadTicket_post = async (req, res) => {
     const traveler = req.userId;
     const token = req.nat;

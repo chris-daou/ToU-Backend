@@ -36,6 +36,11 @@ let transporter = nodemailer.createTransport({
         });
 }
 
+/*The fp_post function first extracts the email from the HTTP request body. It then searches for the user with this email in the User and Traveler collections 
+in the database using the findOne method of the Mongoose library. If the user is found, the function creates a payload object containing the user's name, last name, 
+email, ID, and user type. It then generates a JWT using this payload and a secret key. The function then creates a password reset link using the user's ID and the 
+JWT and sends this link to the user's email address using the sendEmail function. Finally, the function sends an HTTP response to the client indicating that the 
+password reset link has been sent.*/
 module.exports.fp_post = async (req, res) => {
     const email = req.body.email;
     console.log(email);
@@ -69,6 +74,12 @@ module.exports.rp_get = async (req, res) => {
     res.send('Uareherererere');
 }
 
+/*The rp_post function first extracts the user/traveler ID, token, and new password fields from the HTTP request. It then verifies the token using the secret key, 
+checks the type of user, and finds the user/traveler object in the database using their ID. If the user/traveler object exists and the new password and confirm password 
+fields in the request body match, the function generates a salt and hashes the new password using bcrypt. It then updates the user/traveler object in the database with 
+the new hashed password and returns a JSON object with a message indicating that the password was successfully changed. If the token is invalid, the function returns a 
+JSON object with a status code of 400 and a message indicating that the token is invalid. If a server error occurs, the function returns a JSON object with a status code 
+of 500 and a message indicating that a server error occurred. */
 module.exports.rp_post = async (req, res) => {
     const id = req.params.id;
     const token = req.params.token;

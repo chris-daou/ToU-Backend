@@ -28,6 +28,19 @@ aws.config.update({
 const BUCKET = process.env.BUCKET
 const s3 = new aws.S3();
 
+/*The `tsignup_post` function first logs the body of the HTTP request to the console.
+It then creates a new instance of the `multer` middleware to handle file uploads, specifying that files should be stored in a specific S3 bucket and assigning 
+them unique filenames based on the current date and original filename.
+The function then calls the `upload.fields` method to handle the file uploads, passing in an array of objects containing the names of the expected files. 
+If an error occurs during the upload process, the function sends an HTTP response with a status code of 400 and a message indicating the error.
+If the upload is successful, the function extracts the user's personal information from the `otherData` property of the request body and checks whether a user or 
+traveler with the same email address already exists in the database. If so, the function sends an HTTP response with a status code of 406 and a message indicating 
+that the email already exists.
+If the email is unique, the function creates a new `Traveler` object with the provided personal information and assigns the uploaded files to the `cv` and `identification` 
+properties of the object. The function then saves the new `Traveler` object to the database.
+The function then composes an email message acknowledging receipt of the user's application and sends it using the configured `transporter` object. Finally, the function 
+sends an HTTP response with a status code of 200 and the newly created `Traveler` object. If an error occurs at any point during the execution of the function, the function 
+logs the error to the console and sends an HTTP response with a status code of 400 and a message indicating that the registration could not be completed.*/
 module.exports.tsignup_post = async (req, res) => {
     console.log(req.body);
     const date = Date.now();

@@ -102,6 +102,15 @@ const createRefreshToken = (id, userType) => {
   return token;
 };
 
+
+/*The singup_post function first extracts the user's information from the HTTP request body.
+It then checks whether the user's email already exists in the database. If it does, the function sends an HTTP response with 
+a status code of 418 and a message indicating that the user already exists.
+If the user's email is not in the database, the function creates a new user account by calling the User.create function with the user's information. 
+The function then generates an email verification link for the user and sends an email to the user's email address. Finally, the function sends an HTTP 
+response with a status code of 201 and a JSON object containing the ID of the newly created user account. If an error occurs during the creation of the user account, 
+the function catches the error, generates an error message using the handleErrors function, and sends an HTTP response with a status code of 400 and a JSON object 
+containing the error message.*/
 module.exports.singup_post = async (req, res) => {
   const { email, password, name, lastname, nationality, gender, city, phone_number } = req.body;
   const found = await Traveler.findOne({email});
@@ -123,6 +132,13 @@ module.exports.singup_post = async (req, res) => {
   }//if email and pass were left empty, error would be generated (by mongoose) since they are both required
 }
 
+/*The login_post function first extracts the email and password from the HTTP request body. If the user is a traveler and their account has not been approved, 
+the function returns an HTTP response with a status code of 400 and a message indicating that the account has not been approved. If the user is a traveler and 
+their account has been revoked, the function returns an HTTP response with a status code of 400 and a message indicating that the account has been revoked. If the user 
+is a registered user but has not yet confirmed their email, the function returns an HTTP response with a status code of 406 and a message indicating that the user should 
+confirm their email. If the email and password are valid and the user has been authenticated, the function creates an access token and a refresh token for the user, saves 
+the tokens to the database, and returns an HTTP response with a status code of 200 and the user's ID, type, and access token in JSON format. If an error occurs during the 
+execution of the function, the function catches the error, handles it, and returns an HTTP response with a status code of 400 and the error message in JSON format. */
 module.exports.login_post = async (req, res) => {
   const { email, password } = req.body;
   try{
@@ -190,6 +206,12 @@ module.exports.login_post = async (req, res) => {
       else res.status(400).json({ errors });
   }
 }
+
+/*The confirmEmail_get function first extracts the id and token from the HTTP request parameters.
+It then verifies the token using the secret email key.
+If the token is valid, the function retrieves the user object from the database and updates the user's valid_e field to true. 
+The function then sends an HTTP response with a message indicating that the email has been successfully confirmed.
+If the token is invalid, the function sends an HTTP response with a message indicating that an error has occurred.*/
 module.exports.confirmEmail_get = async (req, res) => {
     console.log("hi")
     const id = req.params.id;
@@ -204,6 +226,12 @@ module.exports.confirmEmail_get = async (req, res) => {
     else res.send("Error Occured");
 }
 
+
+  /*The logout_post function first extracts the access token from the HTTP request header.
+  It then deletes the access token from the database using the Token model's deleteOne method.
+  If the deletion is successful, the function sends an HTTP response with a status code of 200 and a message indicating that the user has been successfully logged out. 
+  If an error occurs during the execution of the function, the function catches the error, logs it to the console, and sends an HTTP response with a status code of 500 
+  and a message indicating that there was an error logging out.*/
   module.exports.logout_post = async (req, res) => {
     try {
       // get the user's refresh token from the request header

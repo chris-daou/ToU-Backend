@@ -1,6 +1,7 @@
 const { Router } = require('express');
 const clientController = require('../controllers/ClientController');
 const productController = require('../controllers/ProductController');
+const LandingpageController = require('../controllers/LandingpageController');
 
 const { requireAuth, checkUser} = require('../middleware/Middleware');
 
@@ -47,5 +48,7 @@ router.post('/getrate', clientController.getRate_get);
 router.post('/client/home/contactform', requireAuth, clientController.submitContactForm)
 
 router.post('/support', requireAuth, clientController.submitSupportForm)
+
+router.get('/testimonials', LandingpageController.testimonials_get)
 
 module.exports = router;

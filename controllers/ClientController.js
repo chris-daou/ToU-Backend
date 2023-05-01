@@ -42,6 +42,17 @@ const sendCompletiontoTraveler = async (email, name, lastname, pname) => {
         });
 }
 
+/*The function receives the JWT token and order ID from the request parameters.
+The function retrieves the SECRET_CONFIRM_ORDER environment variable, which is used to verify the token.
+The function verifies the token using the jwt.verify() method, which decodes the token and returns its payload. 
+If the token is invalid, the function returns an error message.
+If the token is valid, the function tries to find the order in the database using the Order.findById() method.
+If the order is found and its status is 1 (meaning it has been accepted by an admin) and its traveler field is not null, 
+the function updates the client_confirmed field to true, sets the status to 2, and saves the order to the database. 
+The function then sends a response to the client with a message indicating that the order has been confirmed.
+If the order has not been approved by an admin, the function sends a response to the client with a message indicating that the order has not yet been approved.
+If there is an error finding or updating the order, the function logs the error to the console.
+If the confirmation date has expired, the function sends a response to the client with a message indicating that the confirmation date has expired.*/
 module.exports.confirm_order_get = async (req, res) => {
     const token = req.params.token;
     const orderId = req.params.orderid;
@@ -67,6 +78,19 @@ module.exports.confirm_order_get = async (req, res) => {
     else res.status(404).json( {message: 'Confirmation Date Expired'});
 }
 
+/*The function receives the authenticated client ID and NAT token from the request parameters.
+The function finds the client in the database using the User.findById() method.
+If the client is found, the function retrieves the list of pending orders from the client's pending_orders field.
+The function initializes an empty array list1 to hold the order and product objects.
+The function uses a for loop to iterate over each order ID in the list of pending orders.
+For each order ID, the function retrieves the order object from the database using the Order.findById() method.
+The function retrieves the product object associated with the order using the Product.findById() method.
+The function creates a new object obj containing both the order and product objects.
+The function adds the new object obj to the list1 array.
+After all order and product objects have been retrieved, the function sends a JSON response to the client containing the list1 array and the NAT 
+token used to authenticate the request.
+If the client is not found, the function sends a JSON response to the client with a message indicating that the client was not found.
+If there is an error finding the client, orders, or products, the function logs the error to the console.*/
 module.exports.getPendingClient_get = async (req, res) => {
     const clientId = req.userId;
     const client = await User.findById(clientId);
@@ -90,6 +114,11 @@ module.exports.getPendingClient_get = async (req, res) => {
     }
 }
 
+/*The function starts by extracting the userId and nat parameters from the request.
+It then tries to find the client in the database using the clientId parameter.
+If the client is found, the function gets the list of active orders for the client and reads the order and product data.
+It then constructs an array of objects, with each object containing an order and its associated product.
+Finally, the function sends a JSON response containing the array of orders and a token. If the client is not found, the function sends an error message and a token.*/
 module.exports.getActiveClient_get = async (req, res) => {
     const clientId = req.userId;
     const client = await User.findById(clientId);
@@ -113,6 +142,7 @@ module.exports.getActiveClient_get = async (req, res) => {
     }
 }
 
+//
 module.exports.getActiveOrder_get = async (req, res) => {
     const clientId = req.user._id;
     const client = await User.findById(clientId);
@@ -131,6 +161,15 @@ module.exports.getActiveOrder_get = async (req, res) => {
     }
 }
 
+
+/*The complete_order_post function first extracts the token, clientId, and orderId from the HTTP request.
+It then uses the clientId and orderId to retrieve the client and order objects from the database.
+If the client and order exist in the database and the order status is 6, the function updates the order status to 7 and updates the client and 
+traveler objects in the database by adding the completed order to their respective completed_orders array and removing it from their active_orders array.
+If the traveler has no new orders or assigned orders, the function sets the traveler's active status to false and removes the pickup location.
+The function then sends an email to the traveler informing them that their order has been completed and returns a JSON object with a status code of 200 and a 
+message indicating that the order has been successfully completed.
+If the client or order cannot be found, the function returns a JSON object with a status code of 404 and a message indicating that the client or order could not be found.*/
 module.exports.complete_order_post = async (req, res) => {
     const token = req.nat;
     const clientId = req.userId;
@@ -174,6 +213,10 @@ module.exports.complete_order_post = async (req, res) => {
     }
 }
 
+/*The getProfile function first extracts the clientId and token from the HTTP request.
+It then uses the clientId to retrieve the client object from the database.
+If the client object exists, the function sends an HTTP response with a status code of 200 and a JSON object containing the client object and the authentication token.
+If the client object does not exist, the function sends an HTTP response with a status code of 400 and a message indicating that something went wrong.*/
 module.exports.getProfile = async (req, res) => {
     const clientId = req.userId;
     const token = req.nat;
@@ -187,6 +230,11 @@ module.exports.getProfile = async (req, res) => {
     }
 }
 
+/*The editProfile function first extracts the clientId and token from the HTTP request. It then uses the clientId to retrieve the user object from the database. 
+If the user object exists, the function attempts to update the user's document with the new profile information contained in the request body. 
+If the update is successful, the function sends a JSON response with the updated user document and the authentication token. If an error occurs during the update process, 
+the function sends a JSON response with a status code of 500 and the error message. If the user object does not exist, the function sends a JSON response with a status 
+code of 500 and an error message.*/
 module.exports.editProfile = async (req, res) => {
     const clientId = req.userId;
     const token = req.nat;
@@ -203,6 +251,15 @@ module.exports.editProfile = async (req, res) => {
     }
 }
 
+/*The changePass_post function first extracts the token, password, newPassword, and clientId from the HTTP request.
+It then uses the clientId to retrieve the client object from the database.
+If the client object exists, the function compares the old password with the password stored in the database using bcrypt.compare. 
+If the passwords match, the function generates a salt using bcrypt.genSalt and hashes the new password using bcrypt.hash. 
+The function then saves the hashed password to the client object and returns an HTTP response with a status code of 200 and a message indicating that the password 
+has been successfully changed.
+If the passwords do not match, the function returns an HTTP response with a status code of 500 and a message indicating that the old password is incorrect.
+If an error occurs during the execution of the function, the function returns an HTTP response with a status code of 500 and a message indicating that the password 
+could not be changed.*/
 module.exports.changePass_post = async (req, res) => {
     console.log('hi')
     const token = req.nat;
@@ -241,6 +298,10 @@ module.exports.changePass_post = async (req, res) => {
 }
 }
 
+/*The getRate_get function first creates an options object containing the URL of the website to fetch the exchange rate and other options. 
+It then uses the request module to send a request to the website and fetches the HTML response. The cheerio module is used to parse the HTML 
+response and extract the latest exchange rate. The extracted rate is then returned in a JSON object in the HTTP response. If an error occurs during the execution 
+of the function, it sends an HTTP response with a status code of 400 and an error message. */
 module.exports.getRate_get = async (req, res) => {
     try{
     const options = {
@@ -263,6 +324,10 @@ module.exports.getRate_get = async (req, res) => {
     }
 }
 
+/*The giveFeedback_post function first extracts the token and orderid from the HTTP request. It then uses the orderid to retrieve the order object from the database. 
+If the order object is found, the function creates a Feedback object using the feedback data from the request body. It then updates the order's feedback field with the 
+ID of the newly created Feedback object and saves the order object to the database. Finally, the function sends an HTTP response indicating whether the feedback was added 
+successfully or not. If an error occurs during the execution of this function, the function sends an HTTP response with an appropriate error message and status code. */
 module.exports.giveFeedback_post = async(req, res) => {
     const token = req.nat;
     const orderId = req.params.orderid;
@@ -285,6 +350,12 @@ module.exports.giveFeedback_post = async(req, res) => {
     }
 }
 
+/*The submitContactForm function first extracts the clientId and token from the HTTP request.
+It then uses the clientId to retrieve the client object from the database.
+If the client is found, the function tries to extract the email, team, subject, and message from the HTTP request and creates a new ContactForm object with this data.
+If the ContactForm object is successfully created, the function sends an HTTP response with a status code of 200 and a success message containing the authentication token.
+If an error occurs during the execution of the function, the function sends an HTTP response with a status code of 400 and a message indicating that something went wrong. 
+If the client is not found, the function sends an HTTP response with a status code of 404 and a message indicating that the client could not be found.*/
 module.exports.submitContactForm = async(req, res) => {
     const clientId = req.userId;
     const client = await User.findById(clientId);
@@ -314,6 +385,13 @@ module.exports.submitContactForm = async(req, res) => {
     }
 }
 
+/*The function first extracts the clientId and token from the HTTP request.
+It then retrieves the client or traveler object from the database using the clientId.
+If the object is a traveler, the function constructs an email message and sends it to the support team.
+If the object is a client, the function constructs an email message and sends it to the support team.
+If the email is sent successfully, the function sends an HTTP response with a status code of 200 and a success message and token.
+If the email fails to send, the function sends an HTTP response with a status code of 400 and an error message and token.
+ */
 module.exports.submitSupportForm = async(req, res) => {
     try{
         const clientId = req.userId;

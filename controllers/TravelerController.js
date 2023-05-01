@@ -34,7 +34,6 @@ let transporter = nodemailer.createTransport({
   });
 
 
-
   const sendAssignedEmailClient = async (email, name, lastname, pname, d1, d2) => {
     let mailOptions = {
         from: 'donotreply.tou.lebanon@outlook.com', // your email address
@@ -59,6 +58,18 @@ let transporter = nodemailer.createTransport({
 module.exports.accept_order_GET = async (req, res) => {
     res.send("You are here. "+req.userId)
 }
+
+/*The accept_order function first extracts the travelerId, orderId, and token from the HTTP request.
+It then uses the travelerId and orderId to retrieve the traveler and order objects from the database.
+If the order has not been confirmed by the client yet, the function sends an HTTP response with a status 
+    code of 400 and a message indicating that the traveler should wait for the client to confirm the order.
+If the order has been confirmed by the client, the function checks whether the traveler has not previously 
+    accepted the order, the order status is 2, and the traveler has a valid ticket. If these conditions are 
+    met, the function assigns the order to the traveler by updating the assigned_orders, waiting_resp, and 
+    ticket fields of the order, and the active_orders and pending_orders fields of the client. The function 
+    then sends an email to the client informing them that their order has been assigned to a traveler. Finally, 
+    the function saves the updated traveler and order objects to the database and sends an HTTP response with a 
+    status code of 200 and a message indicating that the order has been successfully assigned.*/ 
 module.exports.accept_order = async (req, res) => {
     const travelerId = req.userId;
     const orderId = req.params.orderid;
@@ -115,6 +126,12 @@ module.exports.accept_order = async (req, res) => {
     }
 }
 
+/*The `reject_order` function begins by getting the `travelerId`, `orderId`, and `token` from the request object. 
+    It then tries to find the traveler and order objects in the database using the IDs provided. 
+If the order meets the conditions to be rejected, the function updates the order's status, pickup location, 
+    estimated arrival, waiting_resp, and traveler properties to their initial values. It then saves the updated order and traveler objects to the database.
+Finally, the function sends a JSON response with a message indicating that the order was rejected and a token. 
+If there is an error during this process, the function sends a JSON response indicating that the order could not be rejected and a token.*/
 module.exports.reject_order = async (req, res) => {
     const travelerId = req.userId;
     const orderId = req.params.orderid;
@@ -144,6 +161,14 @@ module.exports.reject_order = async (req, res) => {
     }
 }
 
+/*The cancel_flight function first extracts the token and travelerId from the HTTP request and retrieves the corresponding traveler object from the database.
+The function then loops through the traveler's new_orders and assigned_orders arrays, canceling each order by setting their respective fields to default values 
+    and sending an email to each client to inform them of the cancellation.
+After canceling all the orders, the function updates the traveler's order arrays, sets their active status to false, and sets their provided_pickup field to an empty 
+    string before saving the updated traveler object to the database.
+Finally, the function sends an HTTP response with a status code of 200 and a message indicating that the flight has been successfully canceled, along with the 
+    authentication token. If an error occurs during the execution of this function, it sends an HTTP response with a status code of 400 and a message indicating that the 
+    flight could not be canceled.*/ 
 module.exports.cancel_flight = async (req, res) => {
     const token = req.nat;
     const travelerId = req.userId;
@@ -216,6 +241,11 @@ module.exports.cancel_flight = async (req, res) => {
     }
 };
 
+/*The providePickup_post function first extracts the travelerId and token from the HTTP request.
+It then uses the travelerId to retrieve the traveler object from the database.
+The function then updates the provided_pickup field of the traveler object with the pickup location received 
+in the request body. Finally, the function saves the updated traveler object to the database and sends an HTTP 
+response with a status code of 200 and a message indicating that the pickup location has been successfully provided.*/
 module.exports.providePickup_post = async (req, res) => {
     const travelerId = req.userId;
     const token = req.nat;
@@ -237,6 +267,11 @@ const upload1 = multer({
     })
 })
 
+/*The uploadReceipt function first uses the upload1 middleware to upload a single file from the HTTP request. 
+    If an error occurs during the upload process, the function sends an HTTP response with a status code of 400 and a message indicating that the upload failed.
+The function then extracts the orderId from the HTTP request and retrieves the corresponding order object from the database. 
+    It updates the order's receipt field with the filename of the uploaded file and saves the updated order object to the database. 
+    Finally, the function sends an HTTP response with a message indicating that the upload is complete.*/
 module.exports.uploadReceipt_post = async (req, res) => {
     upload1.single('file')(req, res, async (err) => {
       if (err) {
@@ -282,7 +317,12 @@ const upload2 = multer({
 })
 
 
-
+/*The uploadProof_post function first extracts the token from the HTTP request and uses it for authentication.
+It then uses the orderId to retrieve the order object from the database.
+If there is an error during file upload, the function sends an HTTP response with a status code of 400 and an error message.
+Otherwise, the function updates the proof field of the order with the filename of the uploaded file and saves it to the database. 
+    Finally, the function sends an HTTP response with a status code of 200 and a message indicating that the upload is done. 
+    If an error occurs during the execution of the function, it sends an HTTP response with a status code of 400 and an error message.*/
 module.exports.uploadProof_post = async (req, res) => {
     try{
         const token = req.nat;
@@ -330,7 +370,15 @@ module.exports.uploadProof_post = async (req, res) => {
         });
 }
 
-
+/*The markshipped function first extracts the token and orderId from the HTTP request.
+It then uses the orderId to retrieve the order object from the database.
+If the order exists, the function checks whether the order status is 3 (i.e., 'ready to ship').
+If the order status is 3, the function updates the order status to 4 (i.e., 'shipped') and saves the changes to the database. 
+    The function then retrieves the client and product objects related to the order and sends an email to the client using the sendOnTheWayEmail 
+    function, informing them that their order is on the way. Finally, the function sends an HTTP response with a status code of 200 and a message 
+    indicating that the order has been successfully marked as shipped. If the order does not exist, the function sends an HTTP response with a status 
+    code of 404 and a message indicating that the order was not found. If an error occurs during the execution of the function, it sends an HTTP response 
+    with a status code of 500 and a message indicating that a server error occurred.*/
 module.exports.markshipped = async(req, res) => {
     const token = req.nat;
     const orderId = req.params.orderid;
@@ -380,7 +428,14 @@ const sendArrivedEmail = async (email, name, lastname, pname) => {
     }
 
 
-
+/*The markarrived function first extracts the orderId and token from the HTTP request.
+It then uses the orderId to retrieve the order object from the database.
+If the order exists, the function checks whether the order status is 4 (shipped). If it is, the function updates the order status to 5 (arrived) 
+    and saves it to the database. It then retrieves the client and product objects related to the order and sends an email to the client informing 
+    them that their order has arrived.
+Finally, the function sends an HTTP response with a status code of 200 and a message indicating that the order has been successfully marked as arrived. 
+    If an error occurs during the execution of the function, it sends an HTTP response with a status code of 500 and a message indicating that a server 
+    error occurred. If the order is not found, it sends an HTTP response with a status code of 404 and a message indicating that the order was not found.*/
 module.exports.markarrived = async(req, res) => {
     const token = req.nat;
     const orderId = req.params.orderid;
@@ -408,6 +463,13 @@ module.exports.markarrived = async(req, res) => {
     }
 }
 
+/*The getPendingTrav_get function first extracts the travelerId and token from the HTTP request.
+It then retrieves the traveler object from the database using the travelerId.
+If the traveler object is found, the function retrieves the list of pending orders for the traveler by iterating through the traveler's new_orders array 
+    and retrieving the corresponding order and product objects from the database. The function then creates an array of objects, each containing an order 
+    and its corresponding product, and sends the array as a JSON object in the HTTP response along with the authentication token.
+If the traveler object is not found in the database, the function sends an HTTP response with a status code of 404 and a message indicating that the traveler 
+    was not found along with the authentication token.*/
 module.exports.getPendingTrav_get = async (req, res) => {
     const travId = req.userId;
     const trav = await Traveler.findById(travId);
@@ -431,6 +493,14 @@ module.exports.getPendingTrav_get = async (req, res) => {
     }
 }
 
+/*The getActiveTrav_get function first extracts the traveler's ID and token from the HTTP request.
+It then uses the traveler's ID to retrieve the traveler object from the database.
+If the traveler object exists, the function retrieves the list of assigned orders for the traveler and 
+iterates over them to retrieve the product information for each order. The function creates an object containing 
+the order and product information and pushes it to a new array.
+Finally, the function sends an HTTP response with a status code of 200 and a JSON object containing the list of assigned 
+orders and the authentication token. If the traveler object does not exist, the function sends an HTTP response with a status 
+code of 404 and a message indicating that the client was not found. If an error occurs during the execution of the function, it logs the error to the console.*/
 module.exports.getActiveTrav_get = async (req, res) => {
     const travId = req.userId;
     const trav = await Traveler.findById(travId);
@@ -454,6 +524,13 @@ module.exports.getActiveTrav_get = async (req, res) => {
     }
 }
 
+/*The splashScreen_get function first extracts the token and user type from the HTTP request.
+It then checks the user type to determine which splash screen to display. If the user is a User, 
+the function returns a JSON object with a status code of 691 and the user's authentication token. 
+If the user is a Traveler, the function returns a JSON object with a status code of 690 and the traveler's authentication token. 
+If the user is neither a User nor a Traveler, the function returns a JSON object with a status code of 692 and an empty token.
+If an error occurs during the execution of this function, the catch block logs the error and sends an HTTP response with a status 
+code of 400 and a message indicating that a server error has occurred.*/
 module.exports.splashScreen_get = async(req, res) => {
     try{
         const token = req.nat;
@@ -474,6 +551,10 @@ module.exports.splashScreen_get = async(req, res) => {
     }
 }
 
+/*The getProfile function first extracts the traveler's ID and token from the HTTP request.
+It then uses the traveler's ID to retrieve the traveler object from the database.
+If the traveler object exists, the function sends an HTTP response with a status code of 200 and the retrieved traveler object and the authentication token.
+If the traveler object does not exist, the function sends an HTTP response with a status code of 400 and a message indicating that something went wrong.*/
 module.exports.getProfile = async (req, res) => {
     const travId = req.userId;
     const token = req.nat;
@@ -487,7 +568,11 @@ module.exports.getProfile = async (req, res) => {
     }
 }
 
-
+/*The `editProfile` function first extracts the `travId` and `token` from the HTTP request. It then uses the `travId` to retrieve the traveler object from the database.
+If the traveler exists in the database, the function attempts to update the traveler's profile with the data in the HTTP request body using the `findByIdAndUpdate` method. 
+If the update is successful, the function sends a response with the updated traveler object and the authentication token.
+If an error occurs during the update process, the function sends a response with a status code of 500 and the error message.
+If the traveler does not exist in the database, the function sends a response with a status code of 500 and an error message.*/
 module.exports.editProfile = async (req, res) => {
     const travId = req.userId;
     const token = req.nat;
@@ -504,6 +589,13 @@ module.exports.editProfile = async (req, res) => {
     }
 }
 
+/*The hasTicket function first extracts the travelerId and token from the HTTP request.
+It then uses the travelerId to retrieve the traveler object from the database.
+If the traveler object exists and the active field is true, the function retrieves the ticket object from the database and sends an HTTP response 
+with a status code of 200 and a JSON object containing the hasTicket property set to true and the ticket object. If the active field is false, 
+the function sends an HTTP response with a status code of 200 and a JSON object containing the hasTicket property set to false.
+If the traveler object cannot be retrieved from the database, the function sends an HTTP response with a status code of 400 and a message indicating that something went wrong. 
+If an error occurs during the execution of this function, it will throw an error with a status code of 500 and a message indicating that a server error occurred.*/
 module.exports.hasTicket = async (req, res) => {
     const travId = req.userId;
     const token = req.nat;

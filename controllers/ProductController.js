@@ -243,6 +243,9 @@ module.exports.productsearch_get = (req, res) => {
     res.send('u are here')
 }
 
+/*The productsearch_post function first extracts the product link from the HTTP request.
+It then calls the getData function to retrieve the necessary details about the product from the link. If the dimensions or weight are unavailable, they are set to -1.
+The function then formats the details into a JSON object and sends it in the HTTP response.*/
 module.exports.productsearch_post = (req, res) => {
     const productLink = req.body.link;
     if(!productLink){
@@ -300,6 +303,15 @@ module.exports.productsearch_post = (req, res) => {
     })
 }
 
+/*The productrequest_post function first extracts the newNAT, data, and quantity from the HTTP request.
+It then uses the data to retrieve the product object from the database with the matching asin.
+If the product exists in the database, the function checks if there is already a cost associated with the product. 
+If so, it creates a new order with the updated cost for the requested quantity. If not, it creates a new order without a cost for the requested quantity.
+If the product does not exist in the database and has no price, the function throws an error with a status code of 406 and a message indicating that the 
+product is out of stock.
+If the product does not exist in the database and has a price, the function creates a new product with the requested details and creates a new order for the 
+client with the requested quantity. The function then returns a JSON object with a status code of 200 and a message indicating that the order has been successfully 
+created, along with the new authentication token.*/
 module.exports.productrequest_post = async (req, res) => {
   
   const newNAT = req.nat;
