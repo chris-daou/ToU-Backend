@@ -347,7 +347,7 @@ module.exports.productrequest_post = async (req, res) => {
     }
     else{//Product does not exist in the database
       if(data.price == undefined || data.price == null || data.price == ""){//If Product has no price
-        return res.status(406).json( {message: 'Product is Out of stock'});      //Then it means that product is out of stock
+        return res.status(406).json( {message: 'Product is Out of stock', token: newNAT});      //Then it means that product is out of stock
         
       }
       console.log("The product is new to the db...")
@@ -408,6 +408,8 @@ module.exports.productrequest_post = async (req, res) => {
     }
   }catch(err){
     console.log(err);
+    return res.status(500).json({message: 'Server Error', token: newNAT})
+    
   }
 }
 

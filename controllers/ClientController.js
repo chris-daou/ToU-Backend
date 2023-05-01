@@ -86,7 +86,7 @@ module.exports.getPendingClient_get = async (req, res) => {
             console.log(err);
         }
     }else{
-        res.status(404).json( { message: 'Client Not Found'})
+        res.status(404).json( { message: 'Client Not Found', token})
     }
 }
 
@@ -109,7 +109,7 @@ module.exports.getActiveClient_get = async (req, res) => {
             console.log(err);
         }
     }else{
-        res.status(404).json( { message: 'Client Not Found'})
+        res.status(404).json( { message: 'Client Not Found', token})
     }
 }
 
@@ -170,7 +170,7 @@ module.exports.complete_order_post = async (req, res) => {
             console.log(err);
         }
     }else{
-        res.status(404).json( { message: 'Client or Order Not Found'})
+        res.status(404).json( { message: 'Client or Order Not Found', token})
     }
 }
 
@@ -183,7 +183,7 @@ module.exports.getProfile = async (req, res) => {
         res.status(200).send({client, token});
     }
     else{
-    res.status(400).json( {message: 'Something went wrong'} )
+    res.status(400).json( {message: 'Something went wrong', token} )
     }
 }
 
@@ -220,7 +220,7 @@ module.exports.changePass_post = async (req, res) => {
                 bcrypt.genSalt(10, function(err, salt){
                     if(err){
                         console.log(err);
-                        res.status(500).json({message: 'Server Occured'});
+                        res.status(500).json({message: 'Server Occured', token});
                         return;
                     }
                     console.log('hello')
@@ -236,7 +236,7 @@ module.exports.changePass_post = async (req, res) => {
             
         }catch(err){
             console.log(err);
-            res.status(500).json({message: 'Server Occured'});
+            res.status(500).json({message: 'Server Occured', token});
     }
 }
 }
@@ -277,11 +277,11 @@ module.exports.giveFeedback_post = async(req, res) => {
         }
         catch(err){
             console.log(err);
-            res.status(500).json({message: 'Server Error Occured'});
+            res.status(500).json({message: 'Server Error Occured', token});
         }
     }
     else{
-        res.status(404).json({message: 'Order not Found.'})
+        res.status(404).json({message: 'Order not Found.', token})
     }
 }
 
@@ -306,11 +306,11 @@ module.exports.submitContactForm = async(req, res) => {
 
         }catch(err){
             console.log(err);
-            return res.status(400).json({ message: 'Something went wrong.'})
+            return res.status(400).json({ message: 'Something went wrong.', token})
         }
 
     }else{
-        return res.status(404).json({message: 'Client not found'})
+        return res.status(404).json({message: 'Client not found', token})
     }
 }
 
