@@ -28,13 +28,6 @@ const ticketSchema = new mongoose.Schema({
     traveler: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Traveler'
-    },
-    order: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Order'
-    },
-    valid:{
-        type: Boolean,
     }
 
 })

@@ -134,6 +134,7 @@ const requireAuth = async (req, res, next) => {
     try {
       const accessPayload = jwt.decode(token);
       if (!accessPayload) {
+        await Token.deleteOne({ accessToken: token });
         return res.status(401).json({ message: 'Unauthorized 1' });
       }
   
@@ -171,6 +172,7 @@ const requireAuth = async (req, res, next) => {
               next();
               return;
         }else{
+            await Token.deleteOne({ accessToken: token });
             console.log("3")
             return res.status(401).json({ message: 'Unauthorized 3' });
         }
@@ -185,6 +187,7 @@ const requireAuth = async (req, res, next) => {
     } catch (err) {
       console.log("5")
       console.log(err);
+      await Token.deleteOne({ accessToken: token});
       return res.status(401).json({ message: 'Unauthorized 5' });
     }
   };

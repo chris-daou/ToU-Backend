@@ -41,13 +41,4 @@ app.use(AdminRoute);
 app.use(ClientRoute);
 
 
-//Create Admin
-// const newAdmin = new Admin({
-//     username: 'VBEC',
-//     password: '12345',
-//   });
-// newAdmin.save().then(console.log("Successfully Created new Admin"));
 
-app.listen(5000, function(){
-  console.log("Server started on port 5000");
-})

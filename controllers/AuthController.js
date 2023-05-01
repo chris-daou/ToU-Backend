@@ -3,8 +3,10 @@ const User = require('../models/User');
 const Traveler = require('../models/Traveler');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
-const Token = require('../models/Token')
+const Token = require('../models/Token');
+const Admin = require('../models/Admin')
 require('dotenv').config();
+
 
 
 let transporter = nodemailer.createTransport({
@@ -162,6 +164,20 @@ module.exports.login_post = async (req, res) => {
             })
             ARtoken.save();
             res.status(200).json({user: trav._id, type: trav.type, token: accessToken});
+          }else{
+            const admin = await Admin.login(email, password);
+            if(admin){
+              const accessToken = createAccessToken(admin._id, admin.type);
+              const refreshToken = createRefreshToken(admin._id, admin.type);
+              const ARtoken = new Token({
+                  user: admin._id,
+                  refreshToken: refreshToken,
+                  accessToken: accessToken,
+                  type: admin.type
+              })
+              ARtoken.save();
+              res.status(200).json({user: admin._id, type: admin.type, token: accessToken});
+            }
           }
       }
       
