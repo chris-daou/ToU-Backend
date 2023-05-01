@@ -61,7 +61,7 @@ module.exports.uploadTicket_post = async (req, res) => {
                         ticket.return =  dates[3];
                     }
                     else{
-                        res.status(400).send({ error: 'Not a valid ticket' });
+                        res.status(400).send({ error: 'Not a valid ticket' , token});
                         await Ticket.deleteOne({_id: tid});
                         return;
                     }
@@ -71,7 +71,7 @@ module.exports.uploadTicket_post = async (req, res) => {
                         ticket.return_flight = flights[1];
                     }
                     else{
-                        res.status(400).send({ error: 'Not a valid ticket' });
+                        res.status(400).send({ error: 'Not a valid ticket' ,token});
                         await Ticket.deleteOne({_id: tid});
                         return;
                     }
@@ -83,7 +83,7 @@ module.exports.uploadTicket_post = async (req, res) => {
                         }
                     }
                     else{
-                        res.status(400).send({ error: 'Not a valid ticket' });
+                        res.status(400).send({ error: 'Not a valid ticket' , token});
                         await Ticket.deleteOne({_id: tid});
                         return;
                     }
@@ -129,7 +129,7 @@ module.exports.uploadTicket_post = async (req, res) => {
                     } 
                     catch (err) {
                         console.log(err);
-                        res.status(400).send({ error: err.message });
+                        res.status(400).send({ error: err.message ,token});
                         return;
                     }
                 }
@@ -137,10 +137,10 @@ module.exports.uploadTicket_post = async (req, res) => {
         }
         catch(err){
             console.log(err);
-            res.status(400).send({ error: err.message });
+            res.status(400).send({ error: err.message ,token });
         }
     }
     else{
-        res.status(400).send({ error: 'Traveler is not found or is already active' });
+        res.status(400).send({ error: 'Traveler is not found or is already active' ,token});
     }
 };

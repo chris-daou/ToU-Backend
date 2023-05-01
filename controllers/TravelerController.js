@@ -82,8 +82,8 @@ module.exports.accept_order = async (req, res) => {
                 await traveler.save();
             }
             traveler.assigned_orders.push(orderId); // add the order to the assigned_orders array
-
             order.waiting_resp = false;
+            order.ticket = traveler.ticket;
             const clientId = order.client;
             const client = await User.findById(clientId);
             let indexc = client.pending_orders.indexOf(orderId);
@@ -97,7 +97,7 @@ module.exports.accept_order = async (req, res) => {
 
             const ticketId = traveler.ticket;
             const ticket = Ticket.findById(ticketId);
-            let date_string = ticket.departure;
+            let date_string = ticket.departure.toUpperCase();
             let date_format = "DDMMM";
             let date = moment(date_string, date_format);
             let new_date = date.add(7, 'days');
@@ -144,6 +144,7 @@ module.exports.reject_order = async (req, res) => {
 }
 
 module.exports.cancel_flight = async (req, res) => {
+    const token = req.nat;
     const travelerId = req.userId;
     const traveler = await Traveler.findById(travelerId);
     try{
@@ -463,7 +464,7 @@ module.exports.splashScreen_get = async(req, res) => {
     }
     catch(err){
         console.log(err);
-        res.status(500).send({message: 'Server Error Occured', token});
+        res.status(400).send({message: 'Server Error Occured', token});
     }
 }
 
