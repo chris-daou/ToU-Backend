@@ -315,48 +315,54 @@ module.exports.submitContactForm = async(req, res) => {
 }
 
 module.exports.submitSupportForm = async(req, res) => {
-    const clientId = req.userId;
-    const client = await User.findById(clientId);
-    const token = req.nat;
-    if(!client){
-        const trav = await Traveler.findById(clientId);
-        let mailOptions = {
-            from: 'donotreply.tou.lebanon@outlook.com', // your email address
-            to: 'tou.lebanon@gmail.com', // recipient's email address
-            subject: req.body.subject,
-            text: 'TRAVELER SUPPORT\n\n' + 'traveler('+ clientId +'):\nemail:'+trav.email+'\n\n' + 'message:\n'+req.body.message
-            };
-            await new Promise((resolve, reject) => {
-                transporter.sendMail(mailOptions, (error, info) => {
-                    if (error) {
-                        console.log(error);
-                        reject(error);
-                    } else {
-                        console.log('Email sent: ' + info.response);
-                        resolve();
-                    }
+    try{
+        const clientId = req.userId;
+        const client = await User.findById(clientId);
+        const token = req.nat;
+        if(!client){
+            const trav = await Traveler.findById(clientId);
+            let mailOptions = {
+                from: 'donotreply.tou.lebanon@outlook.com', // your email address
+                to: 'tou.lebanon@gmail.com', // recipient's email address
+                subject: req.body.subject,
+                text: 'TRAVELER SUPPORT\n\n' + 'traveler('+ clientId +'):\nemail:'+trav.email+'\n\n' + 'message:\n'+req.body.message
+                };
+                await new Promise((resolve, reject) => {
+                    transporter.sendMail(mailOptions, (error, info) => {
+                        if (error) {
+                            console.log(error);
+                            reject(error);
+                        } else {
+                            console.log('Email sent: ' + info.response);
+                            resolve();
+                        }
+                    });
                 });
-            });
+                return res.status(200).send({message: 'Successfully Submitted Support Form', token})
+        }
+        else{
+            let mailOptions = {
+                from: 'donotreply.tou.lebanon@outlook.com', // your email address
+                to: 'tou.lebanon@gmail.com', // recipient's email address
+                subject: req.body.subject,
+                text: 'CLIENT SUPPORT\n\n' + 'client('+ clientId +'):\nemail:'+client.email+'\n\n' + 'message:\n'+req.body.message
+                };
+                await new Promise((resolve, reject) => {
+                    transporter.sendMail(mailOptions, (error, info) => {
+                        if (error) {
+                            console.log(error);
+                            reject(error);
+                        } else {
+                            console.log('Email sent: ' + info.response);
+                            resolve();
+                        }
+                    });
+                });
             return res.status(200).send({message: 'Successfully Submitted Support Form', token})
+        }
     }
-    else{
-        let mailOptions = {
-            from: 'donotreply.tou.lebanon@outlook.com', // your email address
-            to: 'tou.lebanon@gmail.com', // recipient's email address
-            subject: req.body.subject,
-            text: 'CLIENT SUPPORT\n\n' + 'client('+ clientId +'):\nemail:'+client.email+'\n\n' + 'message:\n'+req.body.message
-            };
-            await new Promise((resolve, reject) => {
-                transporter.sendMail(mailOptions, (error, info) => {
-                    if (error) {
-                        console.log(error);
-                        reject(error);
-                    } else {
-                        console.log('Email sent: ' + info.response);
-                        resolve();
-                    }
-                });
-            });
-        return res.status(200).send({message: 'Successfully Submitted Support Form', token})
+    catch(err){
+        console.log(err);
+        return res.status(400).send({message: 'Something went wrong.', token})
     }
 }
