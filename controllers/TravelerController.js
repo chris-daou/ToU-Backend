@@ -67,6 +67,7 @@ module.exports.accept_order = async (req, res) => {
         const traveler = await Traveler.findById(travelerId);
         const order = await Order.findById(orderId);
         if(!order.client_confirmed){
+            console.log("huna")
             res.status(400).json({ message:'Please wait until the client has confirmed their order', token});
             return;
         }
@@ -96,7 +97,7 @@ module.exports.accept_order = async (req, res) => {
             const prod = Product.findById(prodId);
 
             const ticketId = traveler.ticket;
-            const ticket = Ticket.findById(ticketId);
+            const ticket = await Ticket.findById(ticketId);
             let date_string = ticket.departure.toUpperCase();
             let date_format = "DDMMM";
             let date = moment(date_string, date_format);
@@ -283,22 +284,27 @@ const upload2 = multer({
 
 
 module.exports.uploadProof_post = async (req, res) => {
-    const token = req.nat;
-    upload2.single('file')(req, res, async (err) => {
-      if (err) {
-        console.log(err);
-        return res.status(400).send({ error: err.message, token });
-      }
-      const orderId = req.params.orderid;
-      const order = await Order.findById(orderId);
+    try{
+        const token = req.nat;
+        upload2.single('file')(req, res, async (err) => {
+        if (err) {
+            console.log(err);
+            return res.status(400).send({ error: err.message, token });
+        }
+        const orderId = req.params.orderid;
+        const order = await Order.findById(orderId);
 
-      const filename = req.file.key; 
-      
-      order.proof = filename;
-      order.save().then(console.log(order));
-      
-      res.send({message:'Done', token});
-    });
+        const filename = req.file.key; 
+        
+        order.proof = filename;
+        order.save().then(console.log(order));
+        
+        res.send({message:'Done', token});
+        });
+    }
+    catch(err){
+        res.status(400).send({error: err.message, token});
+    }
   };
 
 

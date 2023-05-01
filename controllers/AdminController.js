@@ -17,16 +17,15 @@ let transporter = nodemailer.createTransport({
       pass: '*31&pCbE' // your email password
     }
   });
-
-// let transporter1 = nodemailer.createTransport({
-//   host: 'smtp-mail.outlook.com',
-//   port: 587,
-//   secure: false,
-//   auth: {
-//     user: 'donotreply.tou.lebanon@outlook.com', // your email address
-//     pass: '*31&pCbE' // your email password
-//   }
-// });
+let transporter1 = nodemailer.createTransport({
+  host: 'smtp-mail.outlook.com',
+  port: 587,
+  secure: false,
+  auth: {
+    user: 'donotreply.tou.lebanon@outlook.com', // your email address
+    pass: '*31&pCbE' // your email password
+  }
+});
 
 
 
@@ -63,7 +62,7 @@ const send2to3EmailClient = async (email, name, lastname, pname) => {
         text: 'Dear ' + name + ' ' + lastname + ',\n\n' + 'This email has been sent to let you know that your requested order:\n'+ pname +'\nhas been acquired by the traveler!. \n' + 'Best regards,\n'
         };
         await new Promise((resolve, reject) => {
-            transporter.sendMail(mailOptions, (error, info) => {
+            transporter1.sendMail(mailOptions, (error, info) => {
                 if (error) {
                     console.log(error);
                     reject(error);
@@ -261,9 +260,9 @@ module.exports.update_delivery_status_post = async (req, res) => {
                 order.save().then(sendProofEmailApproved(email, name, lastname));
 
                 const prodId = order.item;
-                const prod = Product.findById(prodId);
+                const prod = await Product.findById(prodId);
                 const clientId = order.client;
-                const client = User.findById(clientId);
+                const client = await User.findById(clientId);
                 send2to3EmailClient(client.email, client.name, client.lastname, prod.title)
                 res.send({order, incremented: true});
             }
@@ -357,9 +356,10 @@ module.exports.assign_order_post = async (req, res) =>{
 
 module.exports.rejectorder_post = async (req, res) => {
     const orderId = req.params.orderid;
-    const order = Order.findById(orderId);
+    const order = await Order.findById(orderId);
     if(order){
         try{
+            console.log(order.status)
             if(order.status == 0 && order.waiting_resp == false && order.traveler == null){
                 order.status = -1;
                 order.save().then(console.log(order));
@@ -368,13 +368,16 @@ module.exports.rejectorder_post = async (req, res) => {
                 const pname = product.title;
                 const clientId = order.client;
                 const client = await User.findById(clientId);
+                const index = client.pending_orders.indexOf(orderId);
+                client.pending_orders.splice(index, 1);
                 sendOrderRejectionEmail(client.email, client.name, client.lastname, pname)
+                await client.save();
                 res.status(200).json( {message: 'Order has been successfully rejecetd'})
             }else{
                 res.status(418).json( {message: 'Cannot reject order as it has already been processed.'})
             }
         }catch(err){
-            
+            console.log(err)
         }
     }else{
         res.status(400).json( {message: 'Order not found'})
