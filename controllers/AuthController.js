@@ -169,6 +169,9 @@ module.exports.login_post = async (req, res) => {
               return;
           }
           const trav = await Traveler.login(email, password);
+          if(trav.revoked){
+            return res.status(400).json({message: 'This account has been revoked by the admin'})
+          }
           if(trav){
             const accessToken = createAccessToken(trav._id, trav.type);
             const refreshToken = createRefreshToken(trav._id, trav.type);
