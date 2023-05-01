@@ -192,10 +192,17 @@ const s3 = new aws.S3();
 
 
 module.exports.getTravelers_get = async (req, res) => {
+    // const token = req.nat
+    console.log('hi');
     const travelers = await Traveler.find({approved: true});
-    res.send(travelers);
+    res.status(200).json({travelers});
 }
 
+module.exports.getAllClients = async (req, res) => {
+    console.log('fetching list of all clients...')
+    const clients = await User.find();
+    res.status(200).json({clients})
+}
 
 module.exports.download_proof_get = async (req, res) => {
     const orderId = req.params.orderid;
@@ -277,8 +284,13 @@ module.exports.update_delivery_status_post = async (req, res) => {
 
 module.exports.get_pendingOrders_get= async (req, res) => {
     const pendingOrders = await Order.find({status: 0});
-    res.send(pendingOrders);
+    res.status(200).json({pendingOrders});
 }
+module.exports.get_activeOrders_get = async (req, res) => {
+    const activeOrders = await Order.find({status: {$gt: 1, $lt: 7}});
+    res.status(200).json({activeOrders});
+  }
+  
 
 
 

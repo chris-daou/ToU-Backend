@@ -164,15 +164,16 @@ module.exports.login_post = async (req, res) => {
           console.log('hi');
           const traveler = await Traveler.findOne({email: email});
           console.log(traveler)
-          if(traveler.approved==false){
+          if(traveler){
+            if(traveler.approved==false){
               res.status(400).json({ message: 'This account has still to be approved by the admin'});
               return;
-          }
-          const trav = await Traveler.login(email, password);
-          if(trav.revoked){
+            }
+            const trav = await Traveler.login(email, password);
+            if(trav.revoked){
             return res.status(400).json({message: 'This account has been revoked by the admin'})
-          }
-          if(trav){
+            }
+            if(trav){
             const accessToken = createAccessToken(trav._id, trav.type);
             const refreshToken = createRefreshToken(trav._id, trav.type);
             const ARtoken = new Token({
@@ -183,8 +184,12 @@ module.exports.login_post = async (req, res) => {
             })
             ARtoken.save();
             res.status(200).json({user: trav._id, type: trav.type, token: accessToken});
-          }else{
+            }
+          }
+          else{
+            console.log('Hi admin')
             const admin = await Admin.login(email, password);
+            console.log('Hellooo')
             if(admin){
               const accessToken = createAccessToken(admin._id, admin.type);
               const refreshToken = createRefreshToken(admin._id, admin.type);

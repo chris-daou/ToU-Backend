@@ -28,7 +28,7 @@ adminSchema.statics.login = async function(email, password) {
     const admin = await this.findOne({ email });
     if(!admin) return false;
     const auth = await bcrypt.compare(password, admin.password);
-    if(auth) return user;
+    if(auth) return admin;
     else{
         throw Error('incorrect password');
     }
