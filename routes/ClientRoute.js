@@ -32,7 +32,7 @@ router.get('/client/home/profile',requireAuth, clientController.getProfile);
 router.put('/client/home/profile/edit',requireAuth, clientController.editProfile);
 //Change simple things
 
-router.post('/client/home/profile/edit/changepassword',)
+router.post('/client/home/profile/edit/changepassword', requireAuth, clientController.changePass_post)
 
 
 router.post('/client/home/activeorder/:orderid/markascomplete', requireAuth, clientController.complete_order_post);

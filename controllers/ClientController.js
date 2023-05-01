@@ -204,23 +204,36 @@ module.exports.editProfile = async (req, res) => {
 }
 
 module.exports.changePass_post = async (req, res) => {
+    console.log('hi')
+    const token = req.nat;
     const password = req.body.password;
-    const clientId = req.user._id;
+    const newPassword = req.body.password2;
+    const clientId = req.userId;
     const client = await User.findById(clientId);
+    console.log(clientId);
     if(client){
         try{
-            bcrypt.genSalt(10, function(err, salt){
-                if(err){
-                    console.log(err);
-                    res.status(500).json({message: 'Server Occured'});
-                    return;
-                }
-                bcrypt.hash(pass2, salt, async function(err, hash){
-                    client.password = hash;
-                    client.save();
-                    res.status(200).json({message: 'Successfully changed password'});
+            console.log('test')
+            const auth = await bcrypt.compare(password, client.password);
+            if(auth){
+                console.log('processing...')
+                bcrypt.genSalt(10, function(err, salt){
+                    if(err){
+                        console.log(err);
+                        res.status(500).json({message: 'Server Occured'});
+                        return;
+                    }
+                    console.log('hello')
+                    bcrypt.hash(newPassword, salt, async function(err, hash){
+                        client.password = hash;
+                        client.save();
+                        return res.status(200).json({message: 'Successfully changed password', token})
+                    })
                 })
-            })
+            }else{
+                return res.status(500).json({message: 'Incorrect Password', token});
+            }
+            
         }catch(err){
             console.log(err);
             res.status(500).json({message: 'Server Occured'});

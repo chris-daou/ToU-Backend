@@ -2,7 +2,7 @@ const { Router } = require('express');
 const authController = require('../controllers/AuthController');
 const rpfpController = require('../controllers/PassresetController');
 const tauthController = require('../controllers/TravelerauthContoller');
-const { checkRPtoken } = require('../middleware/Middleware');
+const { checkRPtoken, requireAuth } = require('../middleware/Middleware');
 // const trpfpController = require('../controllers/TpassresetController');
 
 const router = Router();
@@ -13,7 +13,7 @@ const router = Router();
 router.post("/signup", authController.singup_post);
 // router.get("/login", authController.login_get);
 router.post("/login", authController.login_post);
-router.post('/logout', authController.logout_post);
+router.post('/logout', requireAuth, authController.logout_post);
 
 //forgot-password
 // router.get("/forgot-password", rpfpController.fp_get);
